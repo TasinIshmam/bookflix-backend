@@ -8,7 +8,8 @@
     "start": "node dist/server",
     "clean": "rm -rf dist",
     "build": "npm -s run clean && npm -s run generate:prisma && tsc",
-    "generate:prisma": "prisma generate"
+    "generate:prisma": "prisma generate",
+    "temp" :  "ts-node-dev --no-notify --transpile-only src/temp"
   },
   "keywords": [],
   "author": "",

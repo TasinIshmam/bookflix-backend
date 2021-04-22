@@ -1,5 +1,6 @@
 import express from 'express';
 import { ApolloServer, gql } from 'apollo-server-express';
+import {context} from "./context";
 
 
 const PORT = 4000;
@@ -17,7 +18,7 @@ const resolvers = {
     },
 };
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({ typeDefs, resolvers, context});
 server.applyMiddleware({ app });
 
 app.listen({ port: PORT }, () =>
