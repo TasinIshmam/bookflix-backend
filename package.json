@@ -23,6 +23,7 @@
     "express": "^4.17.1",
     "graphql": "^15.5.0",
     "graphql-scalars": "^1.9.0",
+    "split": "^1.0.1",
     "winston": "^3.3.3"
   },
   "devDependencies": {
