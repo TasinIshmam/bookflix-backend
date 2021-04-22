@@ -1,0 +1,9 @@
+node_modules
+.idea
+.vscode
+.env
+dist
+
+#test files
+src/temp.ts
+src/playground
