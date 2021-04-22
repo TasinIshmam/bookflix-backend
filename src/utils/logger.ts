@@ -5,7 +5,7 @@ import config from '../config/config';
 
 
 const print = format.printf((info) => {
-    const log = `${info.level}: ${info.message}`;
+    const log = `[${info.level.toUpperCase()}]: ${info.message}`;
 
     return info.stack
         ? `${log}\n${info.stack}`
