@@ -17,6 +17,7 @@
   "dependencies": {
     "@prisma/client": "^2.20.1",
     "apollo-server": "^2.22.2",
+    "apollo-server-caching": "^0.6.0",
     "apollo-server-express": "^2.23.0",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",

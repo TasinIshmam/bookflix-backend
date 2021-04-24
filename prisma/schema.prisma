@@ -25,10 +25,10 @@ model Book {
 }
 
 model Genre {
-  id      Int    @id @default(autoincrement())
-  name    String @unique
-  books   Book[]
-  likedBy User[]
+  id                  Int             @id @default(autoincrement())
+  name                String          @unique
+  books               Book[]
+  userFavoriteGenre   FavoriteGenre[]
 }
 
 model Author {
@@ -41,15 +41,14 @@ model Author {
 }
 
 model User {
-  id               Int              @id @default(autoincrement())
-  email            String           @unique
-  password         String
-  createdAt        DateTime         @default(now())
-  firstName        String
-  lastName         String?
-  favoriteGenres   Genre[] 
-  readingHistories ReadingHistory[]
-
+  id                    Int              @id @default(autoincrement())
+  email                 String           @unique
+  password              String
+  createdAt             DateTime         @default(now())
+  firstName             String
+  lastName              String?
+  readingHistories      ReadingHistory[]
+  userFavoriteGenre     FavoriteGenre[]
 }
 
 model ReadingHistory {
@@ -63,6 +62,22 @@ model ReadingHistory {
   isFinishedReading Boolean  @default(false)
   startDate         DateTime @default(now())
   lastUpdate        DateTime @updatedAt
+}
+
+model FavoriteGenre {
+  id          Int    @id @default(autoincrement())
+  genre       Genre? @relation(fields: [genreId], references: [id])
+  genreId     Int?
+  user        User?  @relation(fields: [userId], references: [id])
+  userId      Int?
+  type        FAVORITE_TYPE? @default(USER_CHOICE)
+  relevance   Int?   @default(0)   ///some kind of mechanism to rank genres. Idk if we will use or need this. Defaulting to 0 for now. 
+
+}
+
+enum FAVORITE_TYPE {  
+  USER_CHOICE         // user explicitly chose to favorite this genre.
+  READING_BEHAVIOR    // genre preference was inferred through user's behavior. 
 }
 
 // ---------------  AUTOMATICALLY GENERATED FROM DJANGO ORM, DO NOT MODIFY  -----------------
