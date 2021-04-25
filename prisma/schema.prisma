@@ -61,20 +61,24 @@ model ReadingHistory {
   isFinishedReading Boolean  @default(false)
   startDate         DateTime @default(now())
   lastUpdate        DateTime @updatedAt
+  @@unique([bookId, userId])
+
 }
 
 model FavoriteGenre {
   id          Int    @id @default(autoincrement())
-  genre       Genre? @relation(fields: [genreId], references: [id])
-  genreId     Int?
-  user        User?  @relation(fields: [userId], references: [id])
-  userId      Int?
-  type        FAVORITE_TYPE? @default(USER_CHOICE)
-  relevance   Int?   @default(0)   ///some kind of mechanism to rank genres. Idk if we will use or need this. Defaulting to 0 for now. 
+  genre       Genre  @relation(fields: [genreId], references: [id])
+  genreId     Int
+  user        User   @relation(fields: [userId], references: [id])
+  userId      Int
+  type        FavoriteType @default(USER_CHOICE)
+  relevance   Int?   @default(0)   ///some kind of mechanism to rank genres. Idk if we will use or need this. Defaulting to 0 for now.
+  @@unique([genreId, userId])
+
 
 }
 
-enum FAVORITE_TYPE {  
+enum FavoriteType {
   USER_CHOICE         // user explicitly chose to favorite this genre.
   READING_BEHAVIOR    // genre preference was inferred through user's behavior. 
 }
