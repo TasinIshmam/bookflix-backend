@@ -1,5 +1,5 @@
 
-export const info = () => "Server Running"
+export const ping = () => "Server Running"
 
 
 
