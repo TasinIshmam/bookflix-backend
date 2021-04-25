@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -26,23 +26,23 @@ const prisma = new PrismaClient();
 //     name: string
 // }
 
-
-
 const bookData: Prisma.BookCreateInput[] = [
-    {   //each entry of type BookCreateInput
-        title: 'Book-1-Title',
+    {
+        //each entry of type BookCreateInput
+        title: "Book-1-Title",
         copyright: false,
-        fileUrl: 'url/Book-1-Title',
-        fileType: 'pdf',
-        coverImageUrl: 'url/coverImage1',
+        fileUrl: "url/Book-1-Title",
+        fileType: "pdf",
+        coverImageUrl: "url/coverImage1",
         authors: {
             connectOrCreate: [
                 {
                     where: {
-                        name: 'Author1',
+                        name: "Author1",
                     },
-                    create: {        // AuthorCreateInput type
-                        name: 'Author1',
+                    create: {
+                        // AuthorCreateInput type
+                        name: "Author1",
                         birthYear: 1920,
                         deathYear: 2002,
                     },
@@ -50,120 +50,110 @@ const bookData: Prisma.BookCreateInput[] = [
 
                 {
                     where: {
-                        name: 'Author2',
+                        name: "Author2",
                     },
                     create: {
-                        name: 'Author2',
+                        name: "Author2",
                         birthYear: 1924,
                         deathYear: 2000,
                     },
                 },
-
-
             ],
         },
 
         genres: {
-            connectOrCreate:  [
+            connectOrCreate: [
                 {
-                    where: {name: "genre-1"},
-                    create: {name: "genre-1"}
+                    where: { name: "genre-1" },
+                    create: { name: "genre-1" },
                 },
                 {
-                    where: {name: "genre-2"},
-                    create: {name: "genre-2"}   // GenreCreateWithoutBooksInput type
-                }
-
-            ]
-        }
+                    where: { name: "genre-2" },
+                    create: { name: "genre-2" }, // GenreCreateWithoutBooksInput type
+                },
+            ],
+        },
     },
 
     {
-        title: 'Book-2-Title',
+        title: "Book-2-Title",
         copyright: true,
-        fileUrl: 'url/Book-2-Title',
-        fileType: 'pdf',
-        coverImageUrl: 'url/coverImage2',
+        fileUrl: "url/Book-2-Title",
+        fileType: "pdf",
+        coverImageUrl: "url/coverImage2",
         authors: {
             connectOrCreate: [
                 {
                     where: {
-                        name: 'Author3',
+                        name: "Author3",
                     },
                     create: {
-                        name: 'Author3',
+                        name: "Author3",
                     },
                 },
 
                 {
                     where: {
-                        name: 'Author2',
+                        name: "Author2",
                     },
                     create: {
-                        name: 'Author2',
+                        name: "Author2",
                         birthYear: 1924,
                         deathYear: 2000,
                     },
                 },
-
-
             ],
         },
 
         genres: {
-            connectOrCreate:  [
+            connectOrCreate: [
                 {
-                    where: {name: "genre-2"},
-                    create: {name: "genre-2"}
+                    where: { name: "genre-2" },
+                    create: { name: "genre-2" },
                 },
                 {
-                    where: {name: "genre-4"},
-                    create: {name: "genre-4"}
-                }
-
-            ]
-        }
+                    where: { name: "genre-4" },
+                    create: { name: "genre-4" },
+                },
+            ],
+        },
     },
 
     {
-        title: 'Book-3-Title',
+        title: "Book-3-Title",
         copyright: true,
-        fileUrl: 'url/Book-3-Title',
-        fileType: 'epub',
+        fileUrl: "url/Book-3-Title",
+        fileType: "epub",
         authors: {
             connectOrCreate: [
                 {
                     where: {
-                        name: 'Author5',
+                        name: "Author5",
                     },
                     create: {
-                        name: 'Author5',
+                        name: "Author5",
                     },
                 },
 
                 {
                     where: {
-                        name: 'Author2',
+                        name: "Author2",
                     },
                     create: {
-                        name: 'Author2',
+                        name: "Author2",
                         birthYear: 1999,
                         deathYear: 2000,
                     },
                 },
-
-
             ],
         },
 
         genres: {
-            connectOrCreate:  [  //example of no related genres. If no authors are added, can be similarly empty.
-
-            ]
-        }
-    }
-
-
+            connectOrCreate: [
+                //example of no related genres. If no authors are added, can be similarly empty.
+            ],
+        },
+    },
 ];
 
 async function main() {

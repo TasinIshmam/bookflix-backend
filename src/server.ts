@@ -1,29 +1,27 @@
-import express from 'express';
-import { ApolloServer } from 'apollo-server-express';
-const fs = require('fs');
-const path = require('path');
+import express from "express";
+import { ApolloServer } from "apollo-server-express";
+const fs = require("fs");
+const path = require("path");
 
 // local utils
-import config from './config/config';
-import logger from './utils/logger';
+import config from "./config/config";
+import logger from "./utils/logger";
 
 // graphql context
-import { context } from './context';
+import { context } from "./context";
 
 // graphql resolves
-const Query = require('./resolvers/Query')
+const Query = require("./resolvers/Query");
 
 const resolvers = {
     Query,
-}
+};
 
 const server = new ApolloServer({
-    typeDefs: fs.readFileSync(
-        path.join(__dirname, 'schema.graphql'),
-        'utf8'
-    ),
+    typeDefs: fs.readFileSync(path.join(__dirname, "schema.graphql"), "utf8"),
     resolvers,
-    context });
+    context,
+});
 
 const app = express();
 server.applyMiddleware({ app });
@@ -36,7 +34,7 @@ app.listen({ port: PORT }, () =>
     ),
 );
 
-process.on('uncaughtException', (err) => {
+process.on("uncaughtException", (err) => {
     logger.error(`Uncaught Exception: ${err.message}`);
     process.exit(1);
 });
