@@ -1,24 +1,31 @@
 import express from 'express';
-import { ApolloServer, gql } from 'apollo-server-express';
-import { context } from './context';
+import { ApolloServer } from 'apollo-server-express';
+const fs = require('fs');
+const path = require('path');
+
+// local utils
 import config from './config/config';
 import logger from './utils/logger';
 
-const app = express();
+// graphql context
+import { context } from './context';
 
-const typeDefs = gql`
-    type Query {
-        hello: String
-    }
-`;
+// graphql resolves
+const Query = require('./resolvers/Query')
 
 const resolvers = {
-    Query: {
-        hello: () => 'Hello world!',
-    },
-};
+    Query,
+}
 
-const server = new ApolloServer({ typeDefs, resolvers, context });
+const server = new ApolloServer({
+    typeDefs: fs.readFileSync(
+        path.join(__dirname, 'schema.graphql'),
+        'utf8'
+    ),
+    resolvers,
+    context });
+
+const app = express();
 server.applyMiddleware({ app });
 
 const PORT = config.port || 4000;
