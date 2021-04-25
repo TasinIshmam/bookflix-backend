@@ -28,7 +28,7 @@ model Genre {
   id                  Int             @id @default(autoincrement())
   name                String          @unique
   books               Book[]
-  userFavoriteGenre   FavoriteGenre[]
+  likedByUsers        FavoriteGenre[]
 }
 
 model Author {
@@ -48,7 +48,7 @@ model User {
   firstName             String
   lastName              String?
   readingHistories      ReadingHistory[]
-  userFavoriteGenre     FavoriteGenre[]
+  favoriteGenres        FavoriteGenre[]
 }
 
 model ReadingHistory {
