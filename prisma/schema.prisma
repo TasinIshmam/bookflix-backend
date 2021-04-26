@@ -21,14 +21,14 @@ model Book {
   coverImageUrl    String?
   authors          Author[]
   genres           Genre[]
-  readingHistories ReadingHistory[]
+  readingHistories UserBookInteraction[]
 }
 
 model Genre {
-  id                  Int             @id @default(autoincrement())
-  name                String          @unique
-  books               Book[]
-  likedByUsers        FavoriteGenre[]
+  id           Int             @id @default(autoincrement())
+  name         String          @unique
+  books        Book[]
+  likedByUsers FavoriteGenre[]
 }
 
 model Author {
@@ -41,49 +41,54 @@ model Author {
 }
 
 model User {
-  id                    Int              @id @default(autoincrement())
-  email                 String           @unique
-  password              String
-  createdAt             DateTime         @default(now())
-  name                  String
-  readingHistories      ReadingHistory[]
-  favoriteGenres        FavoriteGenre[]
+  id               Int              @id @default(autoincrement())
+  username            String           @unique
+  password         String
+  createdAt        DateTime         @default(now())
+  name             String
+  readingHistories UserBookInteraction[]
+  favoriteGenres   FavoriteGenre[]
 }
 
-model ReadingHistory {
+model UserBookInteraction {
   id                Int      @id @default(autoincrement())
-  book              Book?    @relation(fields: [bookId], references: [id])
-  bookId            Int?
-  user              User?    @relation(fields: [userId], references: [id])
-  userId            Int?
+  book              Book     @relation(fields: [bookId], references: [id])
+  bookId            Int
+  user              User     @relation(fields: [userId], references: [id])
+  userId            Int
   currentPage       Int      @default(1)
-  isFavorite        Boolean  @default(false)
   isFinishedReading Boolean  @default(false)
   startDate         DateTime @default(now())
   lastUpdate        DateTime @updatedAt
-  @@unique([bookId, userId])
+  isFavorite        Boolean  @default(false)
+  isOnMyList        Boolean  @default(false)
 
+  @@unique([bookId, userId])
 }
 
+
+
 model FavoriteGenre {
-  id          Int    @id @default(autoincrement())
-  genre       Genre  @relation(fields: [genreId], references: [id])
-  genreId     Int
-  user        User   @relation(fields: [userId], references: [id])
-  userId      Int
-  type        FavoriteType @default(USER_CHOICE)
-  relevance   Int?   @default(0)   ///some kind of mechanism to rank genres. Idk if we will use or need this. Defaulting to 0 for now.
+  id        Int          @id @default(autoincrement())
+  genre     Genre        @relation(fields: [genreId], references: [id])
+  genreId   Int
+  user      User         @relation(fields: [userId], references: [id])
+  userId    Int
+  type      FavoriteType @default(USER_CHOICE)
+  relevance Int?         @default(0) ///some kind of mechanism to rank genres. Idk if we will use or need this. Defaulting to 0 for now.
+
+
   @@unique([genreId, userId])
-
-
 }
 
 enum FavoriteType {
-  USER_CHOICE         // user explicitly chose to favorite this genre.
-  READING_BEHAVIOR    // genre preference was inferred through user's behavior. 
+  USER_CHOICE // user explicitly chose to favorite this genre.
+  READING_BEHAVIOR // genre preference was inferred through user's behavior. 
 }
 
 // ---------------  AUTOMATICALLY GENERATED FROM DJANGO ORM, DO NOT MODIFY  -----------------
+
+//todo: remove all these django tables later if we don't need them.
 
 model auth_group {
   id                     Int                      @id @default(autoincrement())
