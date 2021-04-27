@@ -1,0 +1,192 @@
+type Query {
+    " Check if server is alive "
+    ping: String!
+
+    """
+    Return information on the signed in user.
+    Authentication: Required
+    """
+    user: User
+
+    """
+    Get data for a certain book
+    """
+    book(bookId: ID!): Book!
+    """
+    Get favorite books of a certain user
+    Authentication: Required  (Used to determine userId)
+    """
+    favoriteBooks( paginate: PaginationInput, orderBy: BookOrderByInput): BookList!
+    """
+    Get books in users Booklist (My List)
+    Authentication: Required  (Used to determine userId)
+    """
+    myList( paginate: PaginationInput, orderBy: BookOrderByInput): BookList!
+
+    """
+    Get books in the users main feed.
+    Authentication: Required  (Used to determine userId)
+    """
+    feed(
+        "Number of books to return for each category in the feed"
+        bookCountEachCategory: Int!,
+        "Number of categories to return"
+        categoryCount: Int!
+    )
+    : [BookList!]!
+
+    search( filter: String,  paginate: PaginationInput, orderBy: BookOrderByInput ): BookList!
+}
+
+type BookList{
+    id: ID!
+    books: [Book!]!
+    "Total number of books available in this category."
+    count: Int!
+    categoryName: String
+}
+
+type Mutation {
+    signup(email: String!, password: String!, name: String!): AuthPayload
+    login(email: String!, password: String!): AuthPayload
+
+    """
+    Set the list of favorite genres for a certain user. Will overwrite previous preferences.
+    Authentication: Required  (Used to determine userId)
+    """
+    setFavoriteGenres( genreIds: [ID!]!, favoriteType: FavoriteType!): [Genre!]!
+
+    """
+    Include a certain book in user's "favorite" list.
+    Authentication: Required  (Used to determine userId)
+    """
+    setFavoriteBook(bookId: ID!): UserBookInteraction!
+
+    """
+    Include a certain book in Booklist (My List)
+    Authentication: Required  (Used to determine userId)
+    """
+    addBookToMyList(bookId: ID!): UserBookInteraction!
+
+    """
+    Update a user's reading history for a certain book.
+    """
+    updateBookReadingHistory(bookId: ID!, update: updateReadingHistoryInput): UserBookInteraction!
+
+}
+
+type AuthPayload {
+    """
+    JWT token used for authentication. Bearer token to be sent in Authorization Header after logging in. Eg:
+    {
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWqiOjEsImlhdCI5MTYxNzk1NzEyMX0.RVf-79b22O0xLDG4th7uwPJp9UyV0-kcHV_uJqfhJUE"
+    }
+    """
+    token: String
+    " Corresponding user for a given JWT token. "
+    user: User
+}
+
+type User {
+    id: ID!
+    name: String!
+    username: String!
+    books: [UserBookInteraction!]!
+    favoriteGenres: [FavoriteGenre!]!
+}
+
+type FavoriteGenre {
+    id: ID!
+    genre: Genre!
+    type: FavoriteType!
+    user: User!
+}
+
+type UserBookInteraction {
+    id: ID!
+    book: Book!
+    user: User!
+    currentPage: Int!
+    isFinishedReading: Boolean!
+    startDate: DateTime!
+    lastUpdate: DateTime!
+    isFavorite: Boolean!
+    isOnMyList: Boolean!
+}
+
+type Book {
+    id: ID!
+    title: String!
+    copyright: Boolean!
+    language: String!
+    fileUrl: String!
+    fileType: FileType!
+    coverImageUrl: String!
+    genres: [Genre!]!
+    authors: [Author!]!
+    """
+    Get reading history of this book for a certain user.
+    Authentication: Required   (Used to determine userId)
+    """
+    UserBookInteraction: UserBookInteraction
+}
+
+type Author {
+    id: ID!
+    name: String!
+    birthYear: DateTime
+    deathYear: DateTime
+    books: [Book!]!
+}
+
+type Genre {
+    id: ID!
+    name: String
+}
+
+enum FileType {
+    pdf
+    epub
+}
+
+enum FavoriteType {
+    "User explicitly chose to favorite this genre."
+    USER_CHOICE
+    "Genre preference was inferred through user's behavior/reading preferences."
+    READING_BEHAVIOR
+}
+
+"Use one or multiple of the following to sort lists of books"
+input BookOrderByInput {
+    title: Sort
+    createdAt: Sort
+    updatedAt: Sort
+    fileType: Sort
+}
+
+"""
+Implements pagination.
+Can be stacked with any input of type "OrderBy" (Eg: BookOrderByInput).
+Execution happens in the following order: OrderBy -> Skip -> Take
+"""
+input PaginationInput {
+    "Skip past the first N elements in the result"
+    skip: Int
+    "Take/Return the first N number of elements from the result"
+    take: Int
+}
+
+
+
+input updateReadingHistoryInput {
+    currentPage: Int
+    isFinishedReading: Boolean
+}
+
+enum Sort {
+    asc
+    desc
+}
+
+
+scalar DateTime  # for now we won't really make a resolver/validator for this, so we can pass whatever (We'll use string)
