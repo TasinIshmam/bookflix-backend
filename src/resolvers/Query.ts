@@ -1,5 +1,1 @@
-
-export const ping = () => "Server Running"
-
-
-
+export const ping = () => "Server Running";
