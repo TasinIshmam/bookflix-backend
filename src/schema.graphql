@@ -11,7 +11,13 @@ type Query {
     """
     Get data for a certain book
     """
-    book(bookId: ID!): Book!
+    book(bookId: Int!): Book!
+
+    """
+    Get data for a certain author
+    """
+    author(authorId: Int!): Author!
+
     """
     Get favorite books of a certain user
     Authentication: Required  (Used to determine userId)
@@ -39,7 +45,7 @@ type Query {
 }
 
 type BookList{
-    id: ID!
+    id: Int!
     books: [Book!]!
     "Total number of books available in this category."
     count: Int!
@@ -54,24 +60,24 @@ type Mutation {
     Set the list of favorite genres for a certain user. Will overwrite previous preferences.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteGenres( genreIds: [ID!]!, favoriteType: FavoriteType!): [Genre!]!
+    setFavoriteGenres( genreIds: [Int!]!, favoriteType: FavoriteType!): [Genre!]!
 
     """
     Include a certain book in user's "favorite" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteBook(bookId: ID!): UserBookInteraction!
+    setFavoriteBook(bookId: Int!): UserBookInteraction!
 
     """
     Include a certain book in Booklist (My List)
     Authentication: Required  (Used to determine userId)
     """
-    addBookToMyList(bookId: ID!): UserBookInteraction!
+    addBookToMyList(bookId: Int!): UserBookInteraction!
 
     """
     Update a user's reading history for a certain book.
     """
-    updateBookReadingHistory(bookId: ID!, update: updateReadingHistoryInput): UserBookInteraction!
+    updateBookReadingHistory(bookId: Int!, update: updateReadingHistoryInput): UserBookInteraction!
 
 }
 
@@ -88,7 +94,7 @@ type AuthPayload {
 }
 
 type User {
-    id: ID!
+    id: Int!
     name: String!
     username: String!
     books: [UserBookInteraction!]!
@@ -96,14 +102,14 @@ type User {
 }
 
 type FavoriteGenre {
-    id: ID!
+    id: Int!
     genre: Genre!
     type: FavoriteType!
     user: User!
 }
 
 type UserBookInteraction {
-    id: ID!
+    id: Int!
     book: Book!
     user: User!
     currentPage: Int!
@@ -115,7 +121,7 @@ type UserBookInteraction {
 }
 
 type Book {
-    id: ID!
+    id: Int!
     title: String!
     copyright: Boolean!
     language: String!
@@ -132,7 +138,7 @@ type Book {
 }
 
 type Author {
-    id: ID!
+    id: Int!
     name: String!
     birthYear: DateTime
     deathYear: DateTime
@@ -140,7 +146,7 @@ type Author {
 }
 
 type Genre {
-    id: ID!
+    id: Int!
     name: String
 }
 
