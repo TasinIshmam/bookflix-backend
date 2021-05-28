@@ -12,9 +12,13 @@ import { context } from "./context";
 
 // graphql resolves
 const Query = require("./resolvers/Query");
+const Author = require("./resolvers/Author");
+const Book = require("./resolvers/Book");
 
 const resolvers = {
     Query,
+    Author,
+    Book,
 };
 
 const server = new ApolloServer({
