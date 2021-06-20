@@ -7,3 +7,4 @@ dist
 #test files
 src/temp.ts
 src/playground
+todo.md
