@@ -1,9 +1,11 @@
+import config from "../../config/config";
+
 const jwt = require("jsonwebtoken");
 
-export const APP_SECRET = "GraphQL-is-aw3some";
+export const APP_SECRET = config.jwtSecret;
 
 export function getTokenPayload(token) {
-    return jwt.verify(token, APP_SECRET);
+    return jwt.verify(token, config.jwtSecret);
 }
 
 export function getUserId(req, authToken): number {

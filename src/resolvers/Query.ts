@@ -39,7 +39,6 @@ export async function author(parent, args, context: Context, info) {
 
 export async function user(parent, args, context: Context, info) {
     const { userId } = context;
-    console.log(userId);
 
     if (!userId) throw new Error("Not authenticated");
 

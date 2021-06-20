@@ -1,8 +1,9 @@
 import { Context } from "../context";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import config from "../config/config";
 
-import { APP_SECRET, getUserId } from "../services/auth/authentication";
+import { getUserId } from "../services/auth/authentication";
 
 export async function signup(parent, args, context, info) {
     const password = await bcrypt.hash(args.password, 10);
@@ -11,7 +12,7 @@ export async function signup(parent, args, context, info) {
         data: { ...args, password },
     });
 
-    const token = jwt.sign({ userId: user.id }, APP_SECRET);
+    const token = jwt.sign({ userId: user.id }, config.jwtSecret);
 
     return {
         token,
@@ -32,7 +33,7 @@ export async function login(parent, args, context, info) {
         throw new Error("Invalid password");
     }
 
-    const token = jwt.sign({ userId: user.id }, APP_SECRET);
+    const token = jwt.sign({ userId: user.id }, config.jwtSecret);
 
     return {
         token,

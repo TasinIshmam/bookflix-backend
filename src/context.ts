@@ -6,7 +6,7 @@ export interface Context {
     userId?: number;
 }
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 export const context = ({ req }) => {
     return {
@@ -15,3 +15,5 @@ export const context = ({ req }) => {
         userId: req && req.headers.authorization ? getUserId(req, null) : null,
     };
 };
+
+// export default context;

@@ -9,7 +9,6 @@ function convertObjectToArrayOfObjects(objectData: any): any[] | undefined {
         // iterate over them and generate the array
         .map(function (k) {
             // generate the array element
-            console.log(k);
             return { [k]: objectData[k] };
         });
     return res;
