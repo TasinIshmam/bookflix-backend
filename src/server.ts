@@ -11,14 +11,16 @@ import logger from "./utils/logger";
 import { context } from "./context";
 
 // graphql resolves
-const Query = require("./resolvers/Query");
-const Author = require("./resolvers/Author");
-const Book = require("./resolvers/Book");
+import * as Query from "./resolvers/Query";
+import * as Author from "./resolvers/Author";
+import * as Book from "./resolvers/Book";
+import * as Mutation from "./resolvers/Mutation";
 
 const resolvers = {
     Query,
     Author,
     Book,
+    Mutation,
 };
 
 const server = new ApolloServer({

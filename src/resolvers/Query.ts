@@ -1,6 +1,9 @@
+import { Context } from "../context";
+import { print } from "graphql";
+
 export const ping = () => "Server Running";
 
-export async function book(parent, args, context, info) {
+export async function book(parent, args, context: Context, info) {
     const { prisma } = context;
     const { bookId } = args;
 
@@ -17,7 +20,7 @@ export async function book(parent, args, context, info) {
     return book;
 }
 
-export async function author(parent, args, context, info) {
+export async function author(parent, args, context: Context, info) {
     const { prisma } = context;
     const { authorId } = args;
 
@@ -32,4 +35,17 @@ export async function author(parent, args, context, info) {
     }
 
     return author;
+}
+
+export async function user(parent, args, context: Context, info) {
+    const { userId } = context;
+    console.log(userId);
+
+    if (!userId) throw new Error("Not authenticated");
+
+    return context.prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+    });
 }

@@ -53,8 +53,8 @@ type BookList{
 }
 
 type Mutation {
-    signup(email: String!, password: String!, name: String!): AuthPayload
-    login(email: String!, password: String!): AuthPayload
+    signup(username: String!, password: String!, name: String!): AuthPayload
+    login(username: String!, password: String!): AuthPayload
 
     """
     Set the list of favorite genres for a certain user. Will overwrite previous preferences.
