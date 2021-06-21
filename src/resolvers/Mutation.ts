@@ -57,7 +57,9 @@ export async function login(parent, args, context) {
 
 export async function setFavoriteBook(parent, args, context) {
     const { userId } = context;
-    const { bookId, isFavorite } = args;
+    const { bookId, operation } = args;
+
+    const isFavorite = operation === "add";
 
     if (!userId) throw new AuthenticationError("Not logged in");
 
@@ -73,7 +75,7 @@ export async function setFavoriteBook(parent, args, context) {
         },
         create: {
             bookId: parseInt(bookId),
-            userId: parseInt(userId),
+            userId: userId,
             isFavorite: isFavorite,
         },
     });
@@ -83,7 +85,33 @@ export async function setFavoriteBook(parent, args, context) {
 
 export async function setFavoriteGenres(parent, args, context) {}
 
-export async function addBookToMyList(parent, args, context) {}
+export async function setBookToMyList(parent, args, context) {
+    const { userId } = context;
+    const { bookId, operation } = args;
+
+    const isOnMyList = operation === "add";
+
+    if (!userId) throw new AuthenticationError("Not logged in");
+
+    let result = await prisma.userBookInteraction.upsert({
+        where: {
+            bookId_userId: {
+                bookId: parseInt(bookId),
+                userId: userId,
+            },
+        },
+        update: {
+            isOnMyList: isOnMyList,
+        },
+        create: {
+            bookId: parseInt(bookId),
+            userId: userId,
+            isOnMyList: isOnMyList,
+        },
+    });
+
+    return result;
+}
 
 export async function updateBookReadingHistory(parent, args, context) {
     const { userId } = context;
@@ -101,7 +129,7 @@ export async function updateBookReadingHistory(parent, args, context) {
         update: update as updateReadingHistoryInput,
         create: {
             bookId: parseInt(bookId),
-            userId: parseInt(userId),
+            userId: userId,
             ...update,
         },
     });

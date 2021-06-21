@@ -35,13 +35,13 @@ type Query {
     """
     feed(
         "Number of books to return for each category in the feed"
-        bookCountEachCategory: Int!,
+        bookCountEachCategory: Int,
         "Number of categories to return"
         categoryCount: Int!
     )
     : [BookList!]!
 
-    search( filter: String,  paginate: PaginationInput, orderBy: BookOrderByInput ): BookList!
+    search( filter: String!,  paginate: PaginationInput, orderBy: BookOrderByInput ): BookList!
 }
 
 type BookList{
@@ -63,16 +63,16 @@ type Mutation {
     setFavoriteGenres( genreIds: [Int!]!, favoriteType: FavoriteType!): [Genre!]!
 
     """
-    Include a certain book in user's "favorite" list.
+    Add/Remove a certain book from user's "favorite" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteBook(bookId: ID!, isFavorite: Boolean): UserBookInteraction!
+    setFavoriteBook(bookId: ID!, operation: AddOrRemove): UserBookInteraction!
 
     """
-    Include a certain book in Booklist (My List)
+    Add/Remove a certain book from user's Booklist (My List)
     Authentication: Required  (Used to determine userId)
     """
-    addBookToMyList(bookId: ID!): UserBookInteraction!
+    setBookToMyList(bookId: ID!, operation: AddOrRemove): UserBookInteraction!
 
     """
     Update a user's reading history for a certain book.
@@ -192,6 +192,11 @@ input updateReadingHistoryInput {
 enum Sort {
     asc
     desc
+}
+
+enum AddOrRemove {
+    add
+    remove
 }
 
 
