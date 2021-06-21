@@ -57,27 +57,33 @@ type Mutation {
     login(username: String!, password: String!): AuthPayload
 
     """
-    Set the list of favorite genres for a certain user. Will overwrite previous preferences.
+    Add/Remove favorite genres for a certain user.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteGenres( genreIds: [Int!]!, favoriteType: FavoriteType!): [Genre!]!
+    setFavoriteGenres(
+        "The list of genre(s) that are to be added/removed in user's favorites"
+        genreIds: [Int!]!,
+        "Add or Remove specified genre(s)"
+        operation: AddOrRemove!)
+     : setFavoriteGenreOutput!
+#    : [FavoriteGenre!]!
 
     """
     Add/Remove a certain book from user's "favorite" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteBook(bookId: ID!, operation: AddOrRemove): UserBookInteraction!
+    setFavoriteBook(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
 
     """
     Add/Remove a certain book from user's Booklist (My List)
     Authentication: Required  (Used to determine userId)
     """
-    setBookToMyList(bookId: ID!, operation: AddOrRemove): UserBookInteraction!
+    setBookToMyList(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
 
     """
     Update a user's reading history for a certain book.
     """
-    updateBookReadingHistory(bookId: ID!, update: updateReadingHistoryInput): UserBookInteraction!
+    updateBookReadingHistory(bookId: ID!, update: updateReadingHistoryInput!): UserBookInteraction!
 
 }
 
@@ -148,6 +154,10 @@ type Author {
 type Genre {
     id: ID!
     name: String
+}
+
+type setFavoriteGenreOutput {
+    count : Int!
 }
 
 enum FileType {
