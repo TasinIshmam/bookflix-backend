@@ -1,6 +1,6 @@
 import { Context } from "../context";
-import { print } from "graphql";
 import { AuthenticationError } from "apollo-server-errors";
+import { NotFoundError } from "../services/errors/notFoundError";
 
 export const ping = () => "Server Running";
 
@@ -15,7 +15,7 @@ export async function book(parent, args, context: Context, info) {
     });
 
     if (!book) {
-        throw new Error(`No book with bookId ${bookId}`);
+        throw new NotFoundError(`No book with bookId ${bookId}`);
     }
 
     return book;
@@ -32,7 +32,7 @@ export async function author(parent, args, context: Context, info) {
     });
 
     if (!author) {
-        throw new Error(`No author with authorId ${authorId}`);
+        throw new NotFoundError(`No author with authorId ${authorId}`);
     }
 
     return author;
