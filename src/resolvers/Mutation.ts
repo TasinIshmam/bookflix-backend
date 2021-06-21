@@ -3,16 +3,21 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import config from "../config/config";
 
-import { getUserId } from "../services/auth/authentication";
+import { authTokenPayload, getUserId } from "../services/auth/authentication";
+import logger from "../utils/logger";
 
 export async function signup(parent, args, context, info) {
+    logger.debug("Executing signup");
     const password = await bcrypt.hash(args.password, 10);
 
     const user = await context.prisma.user.create({
         data: { ...args, password },
     });
 
-    const token = jwt.sign({ userId: user.id }, config.jwtSecret);
+    const token = jwt.sign(
+        { userId: user.id } as authTokenPayload,
+        config.jwtSecret,
+    );
 
     return {
         token,
@@ -33,7 +38,10 @@ export async function login(parent, args, context, info) {
         throw new Error("Invalid password");
     }
 
-    const token = jwt.sign({ userId: user.id }, config.jwtSecret);
+    const token = jwt.sign(
+        { userId: user.id } as authTokenPayload,
+        config.jwtSecret,
+    );
 
     return {
         token,
