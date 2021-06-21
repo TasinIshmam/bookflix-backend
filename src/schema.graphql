@@ -66,7 +66,7 @@ type Mutation {
     Include a certain book in user's "favorite" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteBook(bookId: ID!): UserBookInteraction!
+    setFavoriteBook(bookId: ID!, isFavorite: Boolean): UserBookInteraction!
 
     """
     Include a certain book in Booklist (My List)
