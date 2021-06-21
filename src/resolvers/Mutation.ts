@@ -87,9 +87,9 @@ export async function addBookToMyList(parent, args, context) {}
 
 export async function updateBookReadingHistory(parent, args, context) {
     const { userId } = context;
-    const { bookId, update } = args;
-
     if (!userId) throw new AuthenticationError("Not logged in");
+
+    const { bookId, update } = args;
 
     let result = await prisma.userBookInteraction.upsert({
         where: {

@@ -1,5 +1,6 @@
 import { Context } from "../../context";
 import { Book } from "@prisma/client";
+import { AuthenticationError } from "apollo-server-errors";
 
 export async function genres(parent: Book, args, context: Context) {
     return context.prisma.book
@@ -18,6 +19,18 @@ export async function UserBookInteraction(
     args,
     context: Context,
 ) {
-    return [];
-    //todo: Once auth is implemented, fill out.
+    const { userId } = context;
+    if (!userId)
+        throw new AuthenticationError(
+            "Unable to access UserBookInteraction. Not logged in",
+        );
+
+    return context.prisma.userBookInteraction.findUnique({
+        where: {
+            bookId_userId: {
+                bookId: parent.id,
+                userId: userId,
+            },
+        },
+    });
 }
