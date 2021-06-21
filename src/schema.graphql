@@ -94,7 +94,7 @@ type AuthPayload {
 }
 
 type User {
-    Id: ID!
+    id: ID!
     name: String!
     username: String!
     books: [UserBookInteraction!]!
@@ -102,14 +102,14 @@ type User {
 }
 
 type FavoriteGenre {
-    Id: ID!
+    id: ID!
     genre: Genre!
     type: FavoriteType!
     user: User!
 }
 
 type UserBookInteraction {
-    Id: ID!
+    id: ID!
     book: Book!
     user: User!
     currentPage: Int!
