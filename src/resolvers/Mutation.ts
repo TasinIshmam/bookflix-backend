@@ -1,12 +1,19 @@
-import { Context } from "../context";
+import { Context, prisma } from "../context";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import config from "../config/config";
 
+interface updateReadingHistoryInput {
+    currentPage?: number;
+    isFinishedReading?: boolean;
+}
+
 import { authTokenPayload, getUserId } from "../services/auth/authentication";
 import logger from "../utils/logger";
+import { AuthenticationError } from "apollo-server-errors";
+import { book } from "./Query";
 
-export async function signup(parent, args, context, info) {
+export async function signup(parent, args, context) {
     const password = await bcrypt.hash(args.password, 10);
 
     const user = await context.prisma.user.create({
@@ -24,7 +31,7 @@ export async function signup(parent, args, context, info) {
     };
 }
 
-export async function login(parent, args, context, info) {
+export async function login(parent, args, context) {
     const user = await context.prisma.user.findUnique({
         where: { username: args.username },
     });
@@ -46,4 +53,34 @@ export async function login(parent, args, context, info) {
         token,
         user,
     };
+}
+
+export async function setFavoriteBook(parent, args, context) {}
+
+export async function setFavoriteGenres(parent, args, context) {}
+
+export async function addBookToMyList(parent, args, context) {}
+
+export async function updateBookReadingHistory(parent, args, context) {
+    const { userId } = context;
+    const { bookId, update } = args;
+
+    if (!userId) throw new AuthenticationError("Not logged in");
+
+    let result = await prisma.userBookInteraction.upsert({
+        where: {
+            bookId_userId: {
+                bookId: parseInt(bookId),
+                userId: userId,
+            },
+        },
+        update: update as updateReadingHistoryInput,
+        create: {
+            bookId: parseInt(bookId),
+            userId: parseInt(userId),
+            ...update,
+        },
+    });
+
+    return result;
 }

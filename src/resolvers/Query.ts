@@ -2,6 +2,7 @@ import { Context } from "../context";
 import { AuthenticationError } from "apollo-server-errors";
 import { NotFoundError } from "../services/errors/notFoundError";
 import { convertObjectToArrayOfObjects } from "../utils/misc";
+
 export const ping = () => "Server Running";
 
 export async function book(parent, args, context: Context, info) {
@@ -40,7 +41,6 @@ export async function author(parent, args, context: Context, info) {
 
 export async function user(parent, args, context: Context, info) {
     const { userId } = context;
-
     if (!userId) throw new AuthenticationError("Not logged in");
 
     return context.prisma.user.findUnique({
