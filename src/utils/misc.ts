@@ -3,7 +3,9 @@
  * Eg Input: { description: 'desc', url: 'desc' }
  * Eg Output: [ { description: 'desc' }, { url: 'desc' } ]
  */
-function convertObjectToArrayOfObjects(objectData: any): any[] | undefined {
+export function convertObjectToArrayOfObjects(
+    objectData: any,
+): any[] | undefined {
     if (!objectData) return undefined;
     let res = Object.keys(objectData)
         // iterate over them and generate the array

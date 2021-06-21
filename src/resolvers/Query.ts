@@ -1,7 +1,7 @@
 import { Context } from "../context";
 import { AuthenticationError } from "apollo-server-errors";
 import { NotFoundError } from "../services/errors/notFoundError";
-
+import { convertObjectToArrayOfObjects } from "../utils/misc";
 export const ping = () => "Server Running";
 
 export async function book(parent, args, context: Context, info) {
@@ -68,7 +68,19 @@ export async function search(parent, args, context: Context, info) {
           }
         : {};
 
+    // optional chaining syntax used for skip and take. Ref: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#optional-chaining
     const results = await context.prisma.book.findMany({
         where,
+        orderBy: convertObjectToArrayOfObjects(args.orderBy),
+        skip: args.paginate?.skip,
+        take: args.paginate?.take,
     });
+
+    const count = await context.prisma.book.count({ where });
+
+    return {
+        id: "search-" + JSON.stringify(args),
+        books: results,
+        count,
+    };
 }
