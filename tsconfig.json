@@ -3,12 +3,11 @@
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
-    "lib": ["esnext"],
+    "lib": ["ES6"],
     "strict": true,
     "noImplicitAny": false,
     "sourceMap": true,
-
-
+    "target": "ES6"
   },
   "include": ["src/**/*"],
   "exclude": [
