@@ -12,15 +12,16 @@ import { context } from "./context";
 
 // graphql resolves
 import * as Query from "./resolvers/Query";
-import * as Author from "./resolvers/Author";
-import * as Book from "./resolvers/Book";
+import * as Author from "./resolvers/models/Author";
+import * as Book from "./resolvers/models/Book";
 import * as Mutation from "./resolvers/Mutation";
-
+import * as UserBookInteraction from "./resolvers/models/UserBookInteraction";
 const resolvers = {
-    Query,
     Author,
     Book,
+    UserBookInteraction,
     Mutation,
+    Query,
 };
 
 // @ts-ignore

@@ -1,4 +1,4 @@
-import { Context } from "../context";
+import { Context } from "../../context";
 import { Book } from "@prisma/client";
 
 export async function genres(parent: Book, args, context: Context) {
