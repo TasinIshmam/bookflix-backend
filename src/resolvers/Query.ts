@@ -10,7 +10,7 @@ export async function book(parent, args, context: Context, info) {
 
     const book = await prisma.book.findUnique({
         where: {
-            id: bookId,
+            id: parseInt(bookId),
         },
     });
 
@@ -27,7 +27,7 @@ export async function author(parent, args, context: Context, info) {
 
     const author = await prisma.author.findUnique({
         where: {
-            id: authorId,
+            id: parseInt(authorId),
         },
     });
 
@@ -47,5 +47,28 @@ export async function user(parent, args, context: Context, info) {
         where: {
             id: userId,
         },
+    });
+}
+
+export async function search(parent, args, context: Context, info) {
+    const where = args.filter
+        ? {
+              OR: [
+                  {
+                      title: { contains: args.filter },
+                  },
+                  {
+                      authors: {
+                          some: {
+                              name: { contains: args.filter },
+                          },
+                      },
+                  },
+              ],
+          }
+        : {};
+
+    const results = await context.prisma.book.findMany({
+        where,
     });
 }

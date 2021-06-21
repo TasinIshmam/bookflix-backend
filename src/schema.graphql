@@ -11,12 +11,12 @@ type Query {
     """
     Get data for a certain book
     """
-    book(bookId: Int!): Book!
+    book(bookId: ID!): Book!
 
     """
     Get data for a certain author
     """
-    author(authorId: Int!): Author!
+    author(authorId: ID!): Author!
 
     """
     Get favorite books of a certain user
@@ -45,7 +45,7 @@ type Query {
 }
 
 type BookList{
-    id: Int!
+    id: ID!
     books: [Book!]!
     "Total number of books available in this category."
     count: Int!
@@ -66,18 +66,18 @@ type Mutation {
     Include a certain book in user's "favorite" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteBook(bookId: Int!): UserBookInteraction!
+    setFavoriteBook(bookId: ID!): UserBookInteraction!
 
     """
     Include a certain book in Booklist (My List)
     Authentication: Required  (Used to determine userId)
     """
-    addBookToMyList(bookId: Int!): UserBookInteraction!
+    addBookToMyList(bookId: ID!): UserBookInteraction!
 
     """
     Update a user's reading history for a certain book.
     """
-    updateBookReadingHistory(bookId: Int!, update: updateReadingHistoryInput): UserBookInteraction!
+    updateBookReadingHistory(bookId: ID!, update: updateReadingHistoryInput): UserBookInteraction!
 
 }
 
@@ -94,7 +94,7 @@ type AuthPayload {
 }
 
 type User {
-    id: Int!
+    Id: ID!
     name: String!
     username: String!
     books: [UserBookInteraction!]!
@@ -102,14 +102,14 @@ type User {
 }
 
 type FavoriteGenre {
-    id: Int!
+    Id: ID!
     genre: Genre!
     type: FavoriteType!
     user: User!
 }
 
 type UserBookInteraction {
-    id: Int!
+    Id: ID!
     book: Book!
     user: User!
     currentPage: Int!
@@ -121,7 +121,7 @@ type UserBookInteraction {
 }
 
 type Book {
-    id: Int!
+    id: ID!
     title: String!
     copyright: Boolean!
     language: String!
@@ -138,7 +138,7 @@ type Book {
 }
 
 type Author {
-    id: Int!
+    id: ID!
     name: String!
     birthYear: DateTime
     deathYear: DateTime
@@ -146,7 +146,7 @@ type Author {
 }
 
 type Genre {
-    id: Int!
+    id: ID!
     name: String
 }
 

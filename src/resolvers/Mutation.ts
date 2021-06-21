@@ -7,7 +7,6 @@ import { authTokenPayload, getUserId } from "../services/auth/authentication";
 import logger from "../utils/logger";
 
 export async function signup(parent, args, context, info) {
-    logger.debug("Executing signup");
     const password = await bcrypt.hash(args.password, 10);
 
     const user = await context.prisma.user.create({
