@@ -19,15 +19,21 @@ type Query {
     author(authorId: ID!): Author!
 
     """
-    Get favorite books of a certain user
+    Get user's book reading history for books in user's Favorites
     Authentication: Required  (Used to determine userId)
     """
-    favoriteBooks( paginate: PaginationInput, orderBy: BookOrderByInput): BookList!
+    favoriteBooks( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
     """
-    Get books in users Booklist (My List)
+    Get user's book reading history for books in user's Booklist (My List)
     Authentication: Required  (Used to determine userId)
     """
-    myList( paginate: PaginationInput, orderBy: BookOrderByInput): BookList!
+    myList( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
+
+    """
+    Get a user's reading history/interaction with a certain book.
+    Authentication: Required  (Used to determine userId)
+    """
+    userBookInteraction(bookId: ID!): UserBookInteraction!
 
     """
     Get books in the users main feed.
@@ -47,10 +53,11 @@ type Query {
 type BookList{
     id: ID!
     books: [Book!]!
-    "Total number of books available in this category."
+    "Total number of books available in this category (count ignores any kind of skip/take condition)."
     count: Int!
     categoryName: String
 }
+
 
 type Mutation {
     signup(username: String!, password: String!, name: String!): AuthPayload

@@ -2,10 +2,11 @@ import { Context } from "../context";
 import { AuthenticationError } from "apollo-server-errors";
 import { NotFoundError } from "../services/errors/notFoundError";
 import { convertObjectToArrayOfObjects } from "../utils/misc";
+import logger from "../utils/logger";
 
 export const ping = () => "Server Running";
 
-export async function book(parent, args, context: Context, info) {
+export async function book(parent, args, context: Context) {
     const { prisma } = context;
     const { bookId } = args;
 
@@ -22,7 +23,7 @@ export async function book(parent, args, context: Context, info) {
     return book;
 }
 
-export async function author(parent, args, context: Context, info) {
+export async function author(parent, args, context: Context) {
     const { prisma } = context;
     const { authorId } = args;
 
@@ -39,7 +40,7 @@ export async function author(parent, args, context: Context, info) {
     return author;
 }
 
-export async function user(parent, args, context: Context, info) {
+export async function user(parent, args, context: Context) {
     const { userId } = context;
     if (!userId) throw new AuthenticationError("Not logged in");
 
@@ -50,8 +51,27 @@ export async function user(parent, args, context: Context, info) {
     });
 }
 
-export async function search(parent, args, context: Context, info) {
-    const where = args.filter
+export async function userBookInteraction(parent, args, context: Context) {
+    const { userId } = context;
+    const { bookId } = args;
+    if (!userId) throw new AuthenticationError("Not logged in");
+
+    let bookInteraction = await context.prisma.userBookInteraction.findUnique({
+        where: {
+            bookId_userId: {
+                bookId: parseInt(bookId),
+                userId: userId,
+            },
+        },
+        rejectOnNotFound: true,
+    });
+    return bookInteraction;
+}
+
+export async function search(parent, args, context: Context) {
+    const { filter, paginate, orderBy } = args;
+
+    const where = filter
         ? {
               OR: [
                   {
@@ -71,9 +91,9 @@ export async function search(parent, args, context: Context, info) {
     // optional chaining syntax used for skip and take. Ref: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#optional-chaining
     const results = await context.prisma.book.findMany({
         where,
-        orderBy: convertObjectToArrayOfObjects(args.orderBy),
-        skip: args.paginate?.skip,
-        take: args.paginate?.take,
+        orderBy: convertObjectToArrayOfObjects(orderBy),
+        skip: paginate?.skip,
+        take: paginate?.take,
     });
 
     const count = await context.prisma.book.count({ where });
@@ -82,5 +102,6 @@ export async function search(parent, args, context: Context, info) {
         id: "search-" + JSON.stringify(args),
         books: results,
         count,
+        category: "search",
     };
 }
