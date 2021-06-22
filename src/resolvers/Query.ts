@@ -105,3 +105,89 @@ export async function search(parent, args, context: Context) {
         category: "search",
     };
 }
+
+export async function favoriteBooks(parent, args, context: Context) {
+    const { userId } = context;
+    if (!userId) throw new AuthenticationError("Not logged in");
+    const { paginate, orderBy } = args;
+
+    // get the book Ids of user's favorite books.
+    const favoriteBookInteraction = await context.prisma.userBookInteraction.findMany(
+        {
+            where: {
+                userId: userId,
+                isFavorite: true,
+            },
+            select: { bookId: true },
+        },
+    );
+
+    // Convert syntax. Eg: [ { bookId: 6 }, { bookId: 5 } ]  =>  [ 6, 5 ]
+    const bookIdArray = favoriteBookInteraction.map(
+        (interaction) => interaction.bookId,
+    );
+
+    //generate search condition
+    const bookSearchCondition = { id: { in: bookIdArray } };
+
+    const books = await context.prisma.book.findMany({
+        where: bookSearchCondition,
+        orderBy: convertObjectToArrayOfObjects(orderBy),
+        skip: paginate?.skip,
+        take: paginate?.take,
+    });
+
+    const count = await context.prisma.book.count({
+        where: bookSearchCondition,
+    });
+
+    return {
+        id: `favoriteBooks-${userId}:` + JSON.stringify(args),
+        books,
+        count,
+        category: "favoriteBooks",
+    };
+}
+
+export async function myList(parent, args, context: Context) {
+    const { userId } = context;
+    if (!userId) throw new AuthenticationError("Not logged in");
+    const { paginate, orderBy } = args;
+
+    // get the book Ids of user's favorite books.
+    const myListBookInteractions = await context.prisma.userBookInteraction.findMany(
+        {
+            where: {
+                userId: userId,
+                isOnMyList: true,
+            },
+            select: { bookId: true },
+        },
+    );
+
+    // Convert syntax. Eg: [ { bookId: 6 }, { bookId: 5 } ]  =>  [ 6, 5 ]
+    const bookIdArray = myListBookInteractions.map(
+        (interaction) => interaction.bookId,
+    );
+
+    //generate search condition
+    const bookSearchCondition = { id: { in: bookIdArray } };
+
+    const books = await context.prisma.book.findMany({
+        where: bookSearchCondition,
+        orderBy: convertObjectToArrayOfObjects(orderBy),
+        skip: paginate?.skip,
+        take: paginate?.take,
+    });
+
+    const count = await context.prisma.book.count({
+        where: bookSearchCondition,
+    });
+
+    return {
+        id: `myList-${userId}:` + JSON.stringify(args),
+        books,
+        count,
+        category: "myList",
+    };
+}
