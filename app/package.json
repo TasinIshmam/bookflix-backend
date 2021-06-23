@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/server",
-    "start": "node dist/server",
+    "start": "tsc && node dist/server.js",
     "clean": "rm -rf dist",
     "build": "npm -s run clean && npm -s run generate:prisma && tsc",
     "generate:prisma": "prisma generate",
