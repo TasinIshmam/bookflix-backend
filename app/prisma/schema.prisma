@@ -82,6 +82,8 @@ model UserAuthorInteraction {
   author     Author  @relation(fields: [authorId], references: [id])
   authorId   Int
   isFavorite Boolean @default(false)
+
+  @@unique([authorId, userId])
 }
 
 model FavoriteGenre {
