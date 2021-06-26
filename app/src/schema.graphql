@@ -17,6 +17,12 @@ type Query {
     Get data for a certain author
     """
     author(authorId: ID!): Author!
+
+    """
+    Get data for multiple authors
+    """
+    authors(paginate: PaginationInput, orderBy: AuthorOrderByInput): [Author!]!
+
     """
     Get user's book reading history for books in user's Favorites
     Authentication: Required  (Used to determine userId)
@@ -213,6 +219,13 @@ input BookOrderByInput {
     createdAt: Sort
     updatedAt: Sort
     fileType: Sort
+}
+
+"Use one or multiple of the following to sort lists of authors"
+input AuthorOrderByInput {
+    name: Sort
+    birthYear: Sort
+    deathYear: Sort
 }
 
 """
