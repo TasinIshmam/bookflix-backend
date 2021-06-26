@@ -134,7 +134,7 @@ type User {
     id: ID!
     name: String!
     username: String!
-    books: [UserBookInteraction!]!
+    bookInteractions: [UserBookInteraction!]!
     favoriteGenres: [FavoriteGenre!]!
     favoriteAuthors: [Author!]!
 }
