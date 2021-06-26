@@ -17,7 +17,6 @@ type Query {
     Get data for a certain author
     """
     author(authorId: ID!): Author!
-
     """
     Get user's book reading history for books in user's Favorites
     Authentication: Required  (Used to determine userId)
@@ -84,6 +83,12 @@ type Mutation {
     setFavoriteBook(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
 
     """
+    Add/Remove a certain author from user's "favorite authors" list.
+    Authentication: Required  (Used to determine userId)
+    """
+    setFavoriteAuthor(authorId: ID!, operation: AddOrRemove!): UserAuthorInteraction!
+
+    """
     Add/Remove a certain book from user's Booklist (My List)
     Authentication: Required  (Used to determine userId)
     """
@@ -114,6 +119,7 @@ type User {
     username: String!
     books: [UserBookInteraction!]!
     favoriteGenres: [FavoriteGenre!]!
+    favoriteAuthors: [Author!]!
 }
 
 type FavoriteGenre {
@@ -133,6 +139,13 @@ type UserBookInteraction {
     lastUpdate: DateTime!
     isFavorite: Boolean!
     isOnMyList: Boolean!
+}
+
+type UserAuthorInteraction {
+    id: ID!
+    author: Author!
+    user: User!
+    isFavorite: Boolean!
 }
 
 type Book {
@@ -165,6 +178,11 @@ type Author {
     birthYear: DateTime
     deathYear: DateTime
     books: [Book!]!
+    """
+    Check if the author is liked by the user making the query.
+    Authentication: Required   (Used to determine userId)
+    """
+    isLikedByUser: Boolean
 }
 
 type Genre {
