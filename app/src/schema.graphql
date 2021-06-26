@@ -14,6 +14,11 @@ type Query {
     book(bookId: ID!): Book!
 
     """
+    Get data for multiple books
+    """
+    books(paginate: PaginationInput, orderBy: BookOrderByInput, filter: BookFilterInput): [Book!]!
+
+    """
     Get data for a certain author
     """
     author(authorId: ID!): Author!
@@ -28,6 +33,7 @@ type Query {
     Authentication: Required  (Used to determine userId)
     """
     favoriteBooks( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
+
     """
     Get user's book reading history for books in user's Booklist (My List)
     Authentication: Required  (Used to determine userId)
@@ -211,6 +217,11 @@ enum FavoriteType {
     USER_CHOICE
     "Genre preference was inferred through user's behavior/reading preferences."
     READING_BEHAVIOR
+}
+
+input BookFilterInput {
+    genres: [ID!]
+    authors: [ID!]
 }
 
 "Use one or multiple of the following to sort lists of books"
