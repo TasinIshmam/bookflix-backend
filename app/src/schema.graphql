@@ -19,6 +19,11 @@ type Query {
     books(paginate: PaginationInput, orderBy: BookOrderByInput, filter: BookFilterInput): [Book!]!
 
     """
+    Get data for multiple genres
+    """
+    genres(paginate: PaginationInput, orderBy: GenreOrderByInput): [Genre!]!
+
+    """
     Get data for a certain author
     """
     author(authorId: ID!): Author!
@@ -238,6 +243,12 @@ input AuthorOrderByInput {
     birthYear: Sort
     deathYear: Sort
 }
+
+"Use one or multiple of the following to sort lists of genres"
+input GenreOrderByInput {
+    name: Sort
+}
+
 
 """
 Implements pagination.
