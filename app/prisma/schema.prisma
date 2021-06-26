@@ -39,22 +39,24 @@ model Genre {
 }
 
 model Author {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  birthYear Int?
-  deathYear Int?
-  createdAt DateTime @default(now())
-  books     Book[]
+  id           Int                     @id @default(autoincrement())
+  name         String                  @unique
+  birthYear    Int?
+  deathYear    Int?
+  createdAt    DateTime                @default(now())
+  books        Book[]
+  likedByUsers UserAuthorInteraction[]
 }
 
 model User {
-  id               Int                   @id @default(autoincrement())
-  username         String                @unique
+  id               Int                     @id @default(autoincrement())
+  username         String                  @unique
   password         String
-  createdAt        DateTime              @default(now())
+  createdAt        DateTime                @default(now())
   name             String
   readingHistories UserBookInteraction[]
   favoriteGenres   FavoriteGenre[]
+  favoriteAuthors  UserAuthorInteraction[]
 }
 
 model UserBookInteraction {
@@ -71,6 +73,15 @@ model UserBookInteraction {
   isOnMyList        Boolean  @default(false)
 
   @@unique([bookId, userId])
+}
+
+model UserAuthorInteraction {
+  id         Int     @id @default(autoincrement())
+  user       User    @relation(fields: [userId], references: [id])
+  userId     Int
+  author     Author  @relation(fields: [authorId], references: [id])
+  authorId   Int
+  isFavorite Boolean @default(false)
 }
 
 model FavoriteGenre {
