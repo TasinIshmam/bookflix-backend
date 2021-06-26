@@ -10,15 +10,22 @@ datasource db {
 //Feature's to potentially add: preferred genres, like/rating, comment.
 
 model Book {
-  id               Int              @id @default(autoincrement())
-  createdAt        DateTime         @default(now())
-  title            String           @unique
-  copyright        Boolean          @default(false)
-  language         String           @default("en")
-  updatedAt        DateTime         @updatedAt
-  fileUrl          String           @unique
+  id               Int                   @id @default(autoincrement())
+  createdAt        DateTime              @default(now())
+  title            String                @unique
+  copyright        Boolean               @default(false)
+  language         String                @default("en")
+  updatedAt        DateTime              @updatedAt
+  fileUrl          String                @unique
   fileType         String
   coverImageUrl    String?
+  description      String?
+  rating           Decimal?
+  maturityRating   String?
+  isbn10           String?               @unique
+  isbn13           String?               @unique
+  yearPublished    String?
+  publisher        String?
   authors          Author[]
   genres           Genre[]
   readingHistories UserBookInteraction[]
@@ -41,10 +48,10 @@ model Author {
 }
 
 model User {
-  id               Int              @id @default(autoincrement())
-  username         String           @unique
+  id               Int                   @id @default(autoincrement())
+  username         String                @unique
   password         String
-  createdAt        DateTime         @default(now())
+  createdAt        DateTime              @default(now())
   name             String
   readingHistories UserBookInteraction[]
   favoriteGenres   FavoriteGenre[]
@@ -66,8 +73,6 @@ model UserBookInteraction {
   @@unique([bookId, userId])
 }
 
-
-
 model FavoriteGenre {
   id        Int          @id @default(autoincrement())
   genre     Genre        @relation(fields: [genreId], references: [id])
@@ -85,7 +90,6 @@ enum FavoriteType {
   USER_CHOICE // user explicitly chose to favorite this genre.
   READING_BEHAVIOR // genre preference was inferred through user's behavior. 
 }
-
 
 model admin_interface_theme {
   id                                       Int     @id @default(autoincrement())
