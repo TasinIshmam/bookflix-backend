@@ -6,6 +6,6 @@ node_modules
 dist
 
 #test files
-src/temp.ts
-src/playground
+app/src/temp.ts
+app/src/playground
 todo.md
