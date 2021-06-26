@@ -75,7 +75,7 @@ type Mutation {
         genreIds: [Int!]!,
         "Add or Remove specified genre(s)"
         operation: AddOrRemove!)
-     : setFavoriteGenreOutput!
+    : setFavoriteGenreOutput!
 
     """
     Add/Remove a certain book from user's "favorite" list.
@@ -142,7 +142,14 @@ type Book {
     language: String!
     fileUrl: String!
     fileType: FileType!
-    coverImageUrl: String!
+    coverImageUrl: String
+    description: String
+    rating: Float
+    maturityRating: String
+    isbn10: String
+    isbn13: String
+    yearPublished: String
+    publisher: String
     genres: [Genre!]!
     authors: [Author!]!
     """
