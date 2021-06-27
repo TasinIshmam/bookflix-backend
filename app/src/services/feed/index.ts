@@ -13,6 +13,11 @@ export async function getHighlightBooks(count: number): Promise<Booklist> {
         orderBy: {
             rating: "desc",
         },
+        where: {
+            NOT: {
+                rating: null,
+            },
+        },
         take: count,
     });
 
