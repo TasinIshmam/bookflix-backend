@@ -3,19 +3,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import config from "../config/config";
 
-interface updateReadingHistoryInput {
-    currentPage?: number;
-    isFinishedReading?: boolean;
-}
-
-import { authTokenPayload, getUserId } from "../services/auth/authentication";
-import logger from "../utils/logger";
-import {
-    ApolloError,
-    AuthenticationError,
-    UserInputError,
-} from "apollo-server-errors";
-import { author, book } from "./Query";
+import { authTokenPayload } from "../services/auth/authentication";
+import { AuthenticationError, UserInputError } from "apollo-server-errors";
+import { updateReadingHistoryInput } from "./types";
 
 export async function signup(parent, args, context: Context) {
     const password = await bcrypt.hash(args.password, 10);
