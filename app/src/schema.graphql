@@ -16,12 +16,12 @@ type Query {
     """
     Get data for multiple books
     """
-    books(paginate: PaginationInput, orderBy: BookOrderByInput, filter: BookFilterInput): [Book!]!
+    books(paginate: PaginationInput, orderBy: BookOrderByInput, filter: BookFilterInput): BookList
 
     """
     Get data for multiple genres
     """
-    genres(paginate: PaginationInput, orderBy: GenreOrderByInput): [Genre!]!
+    genres(paginate: PaginationInput, orderBy: GenreOrderByInput): GenresOutput
 
     """
     Get data for a certain author
@@ -31,7 +31,7 @@ type Query {
     """
     Get data for multiple authors
     """
-    authors(paginate: PaginationInput, orderBy: AuthorOrderByInput): [Author!]!
+    authors(paginate: PaginationInput, orderBy: AuthorOrderByInput): AuthorsOutput
 
     """
     Get user's book reading history for books in user's Favorites
@@ -73,6 +73,21 @@ type BookList{
     count: Int!
     categoryName: String
 }
+
+type GenresOutput {
+    id: ID!
+    genres: [Genre!]!
+    "Total number of genres available"
+    count: Int!
+}
+
+type AuthorsOutput {
+    id: ID!
+    authors: [Author!]!
+    "Total number of authors available"
+    count: Int!
+}
+
 
 
 type Mutation {
