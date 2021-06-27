@@ -227,3 +227,48 @@ export async function genres(parent, args, context: Context) {
         genres,
     };
 }
+
+export async function books(parent, args, context: Context) {
+    const { paginate, orderBy, filter } = args;
+
+    // filter?.authors  -> shorthand for filters? filters.author : undefined.
+    const authorsCondition = filter?.authors
+        ? {
+              some: {
+                  id: {
+                      in: filter.authors.map((author) => parseInt(author)), // convert array of strings  into array of integers.
+                  },
+              },
+          }
+        : undefined;
+
+    const genresCondition = filter?.genres
+        ? {
+              some: {
+                  id: {
+                      in: filter.genres.map((genres) => parseInt(genres)),
+                  },
+              },
+          }
+        : undefined;
+
+    const whereCondition = {
+        authors: authorsCondition,
+        genres: genresCondition,
+    };
+
+    const books = await context.prisma.book.findMany({
+        orderBy: convertObjectToArrayOfObjects(orderBy),
+        skip: paginate?.skip,
+        take: paginate?.take,
+        where: whereCondition,
+    });
+
+    const count = await context.prisma.book.count({ where: whereCondition });
+
+    return {
+        id: `books:` + JSON.stringify(args),
+        count,
+        books,
+    };
+}
