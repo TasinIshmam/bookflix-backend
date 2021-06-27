@@ -10,18 +10,25 @@ datasource db {
 //Feature's to potentially add: preferred genres, like/rating, comment.
 
 model Book {
-  id               Int              @id @default(autoincrement())
-  createdAt        DateTime         @default(now())
-  title            String           @unique
-  copyright        Boolean          @default(false)
-  language         String           @default("en")
-  updatedAt        DateTime         @updatedAt
-  fileUrl          String           @unique
+  id               Int                   @id @default(autoincrement())
+  createdAt        DateTime              @default(now())
+  title            String                @unique
+  copyright        Boolean               @default(false)
+  language         String                @default("en")
+  updatedAt        DateTime              @updatedAt
+  fileUrl          String                @unique
   fileType         String
   coverImageUrl    String?
+  description      String?
+  rating           Decimal?
+  maturityRating   String?
+  isbn10           String?               @unique
+  isbn13           String?               @unique
+  yearPublished    String?
+  publisher        String?
   authors          Author[]
   genres           Genre[]
-  readingHistories UserBookInteraction[]
+  readingHistories UserBookInteraction[]  //todo: Change name of field to userBookInteractions
 }
 
 model Genre {
@@ -32,22 +39,24 @@ model Genre {
 }
 
 model Author {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  birthYear Int?
-  deathYear Int?
-  createdAt DateTime @default(now())
-  books     Book[]
+  id           Int                     @id @default(autoincrement())
+  name         String                  @unique
+  birthYear    Int?
+  deathYear    Int?
+  createdAt    DateTime                @default(now())
+  books        Book[]
+  likedByUsers UserAuthorInteraction[]
 }
 
 model User {
-  id               Int              @id @default(autoincrement())
-  username         String           @unique
+  id               Int                     @id @default(autoincrement())
+  username         String                  @unique
   password         String
-  createdAt        DateTime         @default(now())
+  createdAt        DateTime                @default(now())
   name             String
-  readingHistories UserBookInteraction[]
+  readingHistories UserBookInteraction[]   //todo: Change name of field to userBookInteractions
   favoriteGenres   FavoriteGenre[]
+  favoriteAuthors  UserAuthorInteraction[]
 }
 
 model UserBookInteraction {
@@ -66,7 +75,19 @@ model UserBookInteraction {
   @@unique([bookId, userId])
 }
 
+// Currently only used for "isFavorite" flag.
+// Poor design decision because it dosen't actually make sense to create a explicit manyToMany model like this just to store one boolean state. A implicit manyToMany (supported by Prisma) table named "favoriteAuthors" would have been fine.
+// TODO: Refactor down the line (along with the graphQL schema).
+model UserAuthorInteraction {
+  id         Int     @id @default(autoincrement())
+  user       User    @relation(fields: [userId], references: [id])
+  userId     Int
+  author     Author  @relation(fields: [authorId], references: [id])
+  authorId   Int
+  isFavorite Boolean @default(false)
 
+  @@unique([authorId, userId])
+}
 
 model FavoriteGenre {
   id        Int          @id @default(autoincrement())
@@ -85,7 +106,6 @@ enum FavoriteType {
   USER_CHOICE // user explicitly chose to favorite this genre.
   READING_BEHAVIOR // genre preference was inferred through user's behavior. 
 }
-
 
 model admin_interface_theme {
   id                                       Int     @id @default(autoincrement())

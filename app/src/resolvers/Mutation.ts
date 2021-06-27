@@ -59,6 +59,32 @@ export async function login(parent, args, context: Context) {
     };
 }
 
+export async function setFavoriteAuthor(parent, args, context: Context) {
+    const { userId } = context;
+    if (!userId) throw new AuthenticationError("Not logged in");
+
+    const { authorId, operation } = args;
+    const isFavorite = operation === "add";
+
+    let result = await prisma.userAuthorInteraction.upsert({
+        where: {
+            authorId_userId: {
+                authorId: parseInt(authorId),
+                userId: userId,
+            },
+        },
+        update: {
+            isFavorite: isFavorite,
+        },
+        create: {
+            authorId: parseInt(authorId),
+            userId: userId,
+            isFavorite: isFavorite,
+        },
+    });
+    return result;
+}
+
 export async function setFavoriteBook(parent, args, context: Context) {
     const { userId } = context;
     const { bookId, operation } = args;

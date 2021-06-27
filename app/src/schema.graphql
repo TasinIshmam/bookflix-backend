@@ -14,15 +14,31 @@ type Query {
     book(bookId: ID!): Book!
 
     """
+    Get data for multiple books
+    """
+    books(paginate: PaginationInput, orderBy: BookOrderByInput, filter: BookFilterInput): BookList
+
+    """
+    Get data for multiple genres
+    """
+    genres(paginate: PaginationInput, orderBy: GenreOrderByInput): GenresOutput
+
+    """
     Get data for a certain author
     """
     author(authorId: ID!): Author!
+
+    """
+    Get data for multiple authors
+    """
+    authors(paginate: PaginationInput, orderBy: AuthorOrderByInput): AuthorsOutput
 
     """
     Get user's book reading history for books in user's Favorites
     Authentication: Required  (Used to determine userId)
     """
     favoriteBooks( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
+
     """
     Get user's book reading history for books in user's Booklist (My List)
     Authentication: Required  (Used to determine userId)
@@ -58,6 +74,21 @@ type BookList{
     categoryName: String
 }
 
+type GenresOutput {
+    id: ID!
+    genres: [Genre!]!
+    "Total number of genres available"
+    count: Int!
+}
+
+type AuthorsOutput {
+    id: ID!
+    authors: [Author!]!
+    "Total number of authors available"
+    count: Int!
+}
+
+
 
 type Mutation {
     signup(username: String!, password: String!, name: String!): AuthPayload
@@ -75,13 +106,19 @@ type Mutation {
         genreIds: [Int!]!,
         "Add or Remove specified genre(s)"
         operation: AddOrRemove!)
-     : setFavoriteGenreOutput!
+    : setFavoriteGenreOutput!
 
     """
     Add/Remove a certain book from user's "favorite" list.
     Authentication: Required  (Used to determine userId)
     """
     setFavoriteBook(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
+
+    """
+    Add/Remove a certain author from user's "favorite authors" list.
+    Authentication: Required  (Used to determine userId)
+    """
+    setFavoriteAuthor(authorId: ID!, operation: AddOrRemove!): UserAuthorInteraction!
 
     """
     Add/Remove a certain book from user's Booklist (My List)
@@ -112,8 +149,9 @@ type User {
     id: ID!
     name: String!
     username: String!
-    books: [UserBookInteraction!]!
+    bookInteractions: [UserBookInteraction!]!
     favoriteGenres: [FavoriteGenre!]!
+    favoriteAuthors: [Author!]!
 }
 
 type FavoriteGenre {
@@ -135,6 +173,13 @@ type UserBookInteraction {
     isOnMyList: Boolean!
 }
 
+type UserAuthorInteraction {
+    id: ID!
+    author: Author!
+    user: User!
+    isFavorite: Boolean!
+}
+
 type Book {
     id: ID!
     title: String!
@@ -142,7 +187,14 @@ type Book {
     language: String!
     fileUrl: String!
     fileType: FileType!
-    coverImageUrl: String!
+    coverImageUrl: String
+    description: String
+    rating: Float
+    maturityRating: String
+    isbn10: String
+    isbn13: String
+    yearPublished: String
+    publisher: String
     genres: [Genre!]!
     authors: [Author!]!
     """
@@ -158,6 +210,11 @@ type Author {
     birthYear: DateTime
     deathYear: DateTime
     books: [Book!]!
+    """
+    Check if the author is liked by the user making the query.
+    Authentication: Required   (Used to determine userId)
+    """
+    isLikedByUser: Boolean
 }
 
 type Genre {
@@ -182,6 +239,11 @@ enum FavoriteType {
     READING_BEHAVIOR
 }
 
+input BookFilterInput {
+    genres: [ID!]
+    authors: [ID!]
+}
+
 "Use one or multiple of the following to sort lists of books"
 input BookOrderByInput {
     title: Sort
@@ -189,6 +251,19 @@ input BookOrderByInput {
     updatedAt: Sort
     fileType: Sort
 }
+
+"Use one or multiple of the following to sort lists of authors"
+input AuthorOrderByInput {
+    name: Sort
+    birthYear: Sort
+    deathYear: Sort
+}
+
+"Use one or multiple of the following to sort lists of genres"
+input GenreOrderByInput {
+    name: Sort
+}
+
 
 """
 Implements pagination.

@@ -2,9 +2,10 @@ node_modules
 .idea
 .vscode
 .env
+.env.staging
 dist
 
 #test files
-src/temp.ts
-src/playground
+app/src/temp.ts
+app/src/playground
 todo.md
