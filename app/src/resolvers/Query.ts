@@ -201,5 +201,29 @@ export async function authors(parent, args, context: Context) {
         take: paginate?.take,
     });
 
-    return authors;
+    const count = await context.prisma.author.count({});
+
+    return {
+        id: `authors:` + JSON.stringify(args),
+        count,
+        authors,
+    };
+}
+
+export async function genres(parent, args, context: Context) {
+    const { paginate, orderBy } = args;
+
+    const genres = await context.prisma.genre.findMany({
+        orderBy: convertObjectToArrayOfObjects(orderBy),
+        skip: paginate?.skip,
+        take: paginate?.take,
+    });
+
+    const count = await context.prisma.genre.count({});
+
+    return {
+        id: `genres:` + JSON.stringify(args),
+        count,
+        genres,
+    };
 }
