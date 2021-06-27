@@ -75,6 +75,9 @@ model UserBookInteraction {
   @@unique([bookId, userId])
 }
 
+// Currently only used for "isFavorite" flag.
+// Poor design decision because it dosen't actually make sense to create a explicit manyToMany model like this just to store one boolean state. A implicit manyToMany (supported by Prisma) table named "favoriteAuthors" would have been fine.
+// TODO: Refactor down the line (along with the graphQL schema).
 model UserAuthorInteraction {
   id         Int     @id @default(autoincrement())
   user       User    @relation(fields: [userId], references: [id])
