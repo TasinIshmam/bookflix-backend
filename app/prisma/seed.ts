@@ -6,6 +6,8 @@ import * as bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 const DATA_DIRECTORY = "prisma/seed-data-books-authors-genres";
 
+const DELETE_PREVIOUS_RECORDS_BEFORE_SEEDING = true;
+
 function loadSeedData(dataDirectoryPath: string): Prisma.BookCreateInput[] {
     let bookData: Prisma.BookCreateInput[] = [];
     let jsonFileArray = fs.readdirSync(dataDirectoryPath);
@@ -24,10 +26,8 @@ function loadSeedData(dataDirectoryPath: string): Prisma.BookCreateInput[] {
 
     return bookData;
 }
-async function main() {
-    console.log(`Start seeding ...`);
-    const bookData = loadSeedData(DATA_DIRECTORY);
 
+async function deleteAllPreviousDatabaseRecords() {
     await prisma.userAuthorInteraction.deleteMany({});
     await prisma.userBookInteraction.deleteMany({});
     await prisma.favoriteGenre.deleteMany({});
@@ -35,6 +35,16 @@ async function main() {
     await prisma.book.deleteMany({});
     await prisma.author.deleteMany({});
     await prisma.genre.deleteMany({});
+}
+
+async function main() {
+    console.log(`Start seeding ...`);
+    const bookData = loadSeedData(DATA_DIRECTORY);
+
+    if (DELETE_PREVIOUS_RECORDS_BEFORE_SEEDING) {
+        console.log("DELETING all previous records.");
+        await deleteAllPreviousDatabaseRecords();
+    }
 
     for (const u of bookData) {
         try {
@@ -54,15 +64,20 @@ async function main() {
         password: await bcrypt.hash("password", 10),
     };
 
-    await prisma.user.create({ data: SEED_USER });
+    try {
+        await prisma.user.create({ data: SEED_USER });
+    } catch (e) {
+        console.error("Failed to create seed user record");
+        console.error(e);
+    }
 
     console.log(`Seeding finished.`);
 
     console.log(`---------------Results-------------`);
-    console.log(`Books created: ${await prisma.book.count({})}`);
-    console.log(`Authors created: ${await prisma.author.count({})}`);
-    console.log(`Genres created: ${await prisma.genre.count({})}`);
-    console.log(`Users created: ${await prisma.user.count({})}`);
+    console.log(`Books in database: ${await prisma.book.count({})}`);
+    console.log(`Authors in database: ${await prisma.author.count({})}`);
+    console.log(`Genres in database: ${await prisma.genre.count({})}`);
+    console.log(`Users in database: ${await prisma.user.count({})}`);
 }
 
 main()
