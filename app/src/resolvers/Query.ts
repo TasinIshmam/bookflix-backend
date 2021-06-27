@@ -3,6 +3,7 @@ import { AuthenticationError } from "apollo-server-errors";
 import { NotFoundError } from "../services/errors/notFoundError";
 import { convertObjectToArrayOfObjects } from "../utils/misc";
 import logger from "../utils/logger";
+import { Booklist } from "./types";
 
 export const ping = () => "Server Running";
 
@@ -113,7 +114,11 @@ export async function search(parent, args, context: Context) {
     };
 }
 
-export async function favoriteBooks(parent, args, context: Context) {
+export async function favoriteBooks(
+    parent,
+    args,
+    context: Context,
+): Promise<Booklist> {
     const { userId } = context;
     if (!userId) throw new AuthenticationError("Not logged in");
     const { paginate, orderBy } = args;
@@ -156,7 +161,11 @@ export async function favoriteBooks(parent, args, context: Context) {
     };
 }
 
-export async function myList(parent, args, context: Context) {
+export async function myList(
+    parent,
+    args,
+    context: Context,
+): Promise<Booklist> {
     const { userId } = context;
     if (!userId) throw new AuthenticationError("Not logged in");
     const { paginate, orderBy } = args;
@@ -235,7 +244,7 @@ export async function genres(parent, args, context: Context) {
     };
 }
 
-export async function books(parent, args, context: Context) {
+export async function books(parent, args, context: Context): Promise<Booklist> {
     const { paginate, orderBy, filter } = args;
 
     // filter?.authors  -> shorthand for filters? filters.author : undefined.
@@ -243,7 +252,8 @@ export async function books(parent, args, context: Context) {
         ? {
               some: {
                   id: {
-                      in: filter.authors.map((author) => parseInt(author)), // convert array of strings  into array of integers.
+                      // map array of strings into array of integers.
+                      in: filter.authors.map((author) => parseInt(author)),
                   },
               },
           }

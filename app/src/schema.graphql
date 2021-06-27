@@ -71,7 +71,7 @@ type BookList{
     books: [Book!]!
     "Total number of books available in this category (count ignores any kind of skip/take condition)."
     count: Int!
-    categoryName: String
+    category: String
 }
 
 type GenresOutput {
