@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Booklist } from "../../resolvers/types";
 import { prisma } from "../../context";
 import logger from "../../utils/logger";
+import { shuffle } from "../../utils/misc";
 
 /**
  * Returns books for the hero section. Currently returns the highest rated n books.
@@ -17,9 +18,9 @@ export async function getHighlightBooks(count: number): Promise<Booklist> {
 
     return {
         id: `highlight-${count}`,
-        books,
+        books: shuffle(books),
         count: count,
-        category: "highlight",
+        category: "Top Picks",
     };
 }
 
@@ -45,20 +46,25 @@ export async function getPopularGenreBasedRecommendations(
         },
     });
     // logger.debug(JSON.stringify(genres, undefined, 4));
+    let shuffledGenres = shuffle(genres);
 
-    const genreBasedBookLists: Booklist[] = genres.map((genreWithBooks) => {
-        let numberOfBooksToTake = Math.min(
-            bookCountEachCategory,
-            genreWithBooks.books.length,
-        );
+    const genreBasedBookLists: Booklist[] = shuffledGenres.map(
+        (genreWithBooks) => {
+            let numberOfBooksToTake = Math.min(
+                bookCountEachCategory,
+                genreWithBooks.books.length,
+            );
 
-        return {
-            id: `genre-${genreWithBooks.name}-${bookCountEachCategory}`,
-            books: genreWithBooks.books.slice(0, numberOfBooksToTake),
-            count: numberOfBooksToTake,
-            category: `Try books of genre: ${genreWithBooks.name}`,
-        };
-    });
+            return {
+                id: `genre-${genreWithBooks.name}-${bookCountEachCategory}`,
+                books: shuffle(
+                    genreWithBooks.books.slice(0, numberOfBooksToTake),
+                ), // return books in random order
+                count: numberOfBooksToTake,
+                category: `Try books of genre: ${genreWithBooks.name}`,
+            };
+        },
+    );
 
     return genreBasedBookLists;
 }
