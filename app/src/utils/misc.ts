@@ -15,3 +15,20 @@ export function convertObjectToArrayOfObjects(
         });
     return res;
 }
+
+/**
+ * Shuffles array in place. ES6 version.
+ * Warning: Array destructuring syntax may have undesirable performance characteristics.
+ * Code source: https://stackoverflow.com/a/6274381/8855844
+ * @param {Array} arrayToShuffle items An array containing the items.
+ */
+export function shuffle<E>(arrayToShuffle: E[]): E[] {
+    for (let i = arrayToShuffle.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arrayToShuffle[i], arrayToShuffle[j]] = [
+            arrayToShuffle[j],
+            arrayToShuffle[i],
+        ];
+    }
+    return arrayToShuffle;
+}

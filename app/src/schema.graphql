@@ -56,9 +56,9 @@ type Query {
     Authentication: Required  (Used to determine userId)
     """
     feed(
-        "Number of books to return for each category in the feed"
-        bookCountEachCategory: Int,
-        "Number of categories to return"
+        "Number of books to return for each category in the feed. Range:  1 <= bookCountEachCategory <= 20"
+        bookCountEachCategory: Int!,
+        "Number of categories to return. Range:  1 <= categoryCount <= 20"
         categoryCount: Int!
     )
     : [BookList!]!
