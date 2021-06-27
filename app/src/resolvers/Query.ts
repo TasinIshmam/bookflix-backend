@@ -84,6 +84,13 @@ export async function search(parent, args, context: Context) {
                           },
                       },
                   },
+                  {
+                      genres: {
+                          some: {
+                              name: { contains: args.filter },
+                          },
+                      },
+                  },
               ],
           }
         : {};
