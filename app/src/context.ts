@@ -8,14 +8,17 @@ export interface Context {
 
 export const prisma = new PrismaClient();
 
-export const context = function generateContext({ req }) {
+export const context = async function generateContext({ req }) {
     return {
         // add the entire HTTP request to context
         ...req,
         // add prisma for db queries
         prisma,
         // if authorization header is passed, add the userId to context
-        userId: req && req.headers.authorization ? getUserId(req, null) : null,
+        userId:
+            req && req.headers.authorization
+                ? await getUserId(req, null)
+                : null,
     };
 };
 

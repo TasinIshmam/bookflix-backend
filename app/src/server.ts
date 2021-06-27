@@ -13,15 +13,18 @@ import { context } from "./context";
 // graphql resolves
 import * as Query from "./resolvers/Query";
 import * as Author from "./resolvers/models/Author";
+import * as User from "./resolvers/models/User";
 import * as Book from "./resolvers/models/Book";
 import * as Mutation from "./resolvers/Mutation";
 import * as UserBookInteraction from "./resolvers/models/UserBookInteraction";
+
 const resolvers = {
     Author,
     Book,
     UserBookInteraction,
     Mutation,
     Query,
+    User,
 };
 
 // @ts-ignore

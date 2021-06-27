@@ -10,18 +10,25 @@ datasource db {
 //Feature's to potentially add: preferred genres, like/rating, comment.
 
 model Book {
-  id               Int              @id @default(autoincrement())
-  createdAt        DateTime         @default(now())
-  title            String           @unique
-  copyright        Boolean          @default(false)
-  language         String           @default("en")
-  updatedAt        DateTime         @updatedAt
-  fileUrl          String           @unique
+  id               Int                   @id @default(autoincrement())
+  createdAt        DateTime              @default(now())
+  title            String                @unique
+  copyright        Boolean               @default(false)
+  language         String                @default("en")
+  updatedAt        DateTime              @updatedAt
+  fileUrl          String                @unique
   fileType         String
   coverImageUrl    String?
+  description      String?
+  rating           Decimal?
+  maturityRating   String?
+  isbn10           String?               @unique
+  isbn13           String?               @unique
+  yearPublished    String?
+  publisher        String?
   authors          Author[]
   genres           Genre[]
-  readingHistories UserBookInteraction[]
+  readingHistories UserBookInteraction[]  //todo: Change name of field to userBookInteractions
 }
 
 model Genre {
@@ -32,22 +39,24 @@ model Genre {
 }
 
 model Author {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  birthYear Int?
-  deathYear Int?
-  createdAt DateTime @default(now())
-  books     Book[]
+  id           Int                     @id @default(autoincrement())
+  name         String                  @unique
+  birthYear    Int?
+  deathYear    Int?
+  createdAt    DateTime                @default(now())
+  books        Book[]
+  likedByUsers UserAuthorInteraction[]
 }
 
 model User {
-  id               Int              @id @default(autoincrement())
-  username         String           @unique
+  id               Int                     @id @default(autoincrement())
+  username         String                  @unique
   password         String
-  createdAt        DateTime         @default(now())
+  createdAt        DateTime                @default(now())
   name             String
-  readingHistories UserBookInteraction[]
+  readingHistories UserBookInteraction[]   //todo: Change name of field to userBookInteractions
   favoriteGenres   FavoriteGenre[]
+  favoriteAuthors  UserAuthorInteraction[]
 }
 
 model UserBookInteraction {
@@ -66,7 +75,19 @@ model UserBookInteraction {
   @@unique([bookId, userId])
 }
 
+// Currently only used for "isFavorite" flag.
+// Poor design decision because it dosen't actually make sense to create a explicit manyToMany model like this just to store one boolean state. A implicit manyToMany (supported by Prisma) table named "favoriteAuthors" would have been fine.
+// TODO: Refactor down the line (along with the graphQL schema).
+model UserAuthorInteraction {
+  id         Int     @id @default(autoincrement())
+  user       User    @relation(fields: [userId], references: [id])
+  userId     Int
+  author     Author  @relation(fields: [authorId], references: [id])
+  authorId   Int
+  isFavorite Boolean @default(false)
 
+  @@unique([authorId, userId])
+}
 
 model FavoriteGenre {
   id        Int          @id @default(autoincrement())
@@ -85,182 +106,173 @@ enum FavoriteType {
   USER_CHOICE // user explicitly chose to favorite this genre.
   READING_BEHAVIOR // genre preference was inferred through user's behavior. 
 }
-//
-//// ---------------  AUTOMATICALLY GENERATED FROM DJANGO ORM, DO NOT MODIFY  -----------------
-//
-////todo: remove all these django tables later if we don't need them.
-//
-//model auth_group {
-//  id                     Int                      @id @default(autoincrement())
-//  name                   String                   @unique @db.VarChar(150)
-//  auth_group_permissions auth_group_permissions[]
-//  auth_user_groups       auth_user_groups[]
-//
-//  @@index([name], name: "auth_group_name_a6ea08ec_like")
-//}
-//
-//model auth_group_permissions {
-//  id              BigInt          @id @default(autoincrement())
-//  group_id        Int
-//  permission_id   Int
-//  auth_group      auth_group      @relation(fields: [group_id], references: [id])
-//  auth_permission auth_permission @relation(fields: [permission_id], references: [id])
-//
-//  @@unique([group_id, permission_id], name: "auth_group_permissions_group_id_permission_id_0cd325b0_uniq")
-//  @@index([group_id], name: "auth_group_permissions_group_id_b120cbf9")
-//  @@index([permission_id], name: "auth_group_permissions_permission_id_84c5c92e")
-//}
-//
-//model auth_permission {
-//  id                         Int                          @id @default(autoincrement())
-//  name                       String                       @db.VarChar(255)
-//  content_type_id            Int
-//  codename                   String                       @db.VarChar(100)
-//  django_content_type        django_content_type          @relation(fields: [content_type_id], references: [id])
-//  auth_group_permissions     auth_group_permissions[]
-//  auth_user_user_permissions auth_user_user_permissions[]
-//
-//  @@unique([content_type_id, codename], name: "auth_permission_content_type_id_codename_01ab375a_uniq")
-//  @@index([content_type_id], name: "auth_permission_content_type_id_2f476e4b")
-//}
-//
-//model auth_user {
-//  id                         Int                          @id @default(autoincrement())
-//  password                   String                       @db.VarChar(128)
-//  last_login                 DateTime?                    @db.Timestamptz(6)
-//  is_superuser               Boolean
-//  username                   String                       @unique @db.VarChar(150)
-//  first_name                 String                       @db.VarChar(150)
-//  last_name                  String                       @db.VarChar(150)
-//  email                      String                       @db.VarChar(254)
-//  is_staff                   Boolean
-//  is_active                  Boolean
-//  date_joined                DateTime                     @db.Timestamptz(6)
-//  auth_user_groups           auth_user_groups[]
-//  auth_user_user_permissions auth_user_user_permissions[]
-//  django_admin_log           django_admin_log[]
-//
-//  @@index([username], name: "auth_user_username_6821ab7c_like")
-//}
-//
-//model auth_user_groups {
-//  id         BigInt     @id @default(autoincrement())
-//  user_id    Int
-//  group_id   Int
-//  auth_group auth_group @relation(fields: [group_id], references: [id])
-//  auth_user  auth_user  @relation(fields: [user_id], references: [id])
-//
-//  @@unique([user_id, group_id], name: "auth_user_groups_user_id_group_id_94350c0c_uniq")
-//  @@index([group_id], name: "auth_user_groups_group_id_97559544")
-//  @@index([user_id], name: "auth_user_groups_user_id_6a12ed8b")
-//}
-//
-//model auth_user_user_permissions {
-//  id              BigInt          @id @default(autoincrement())
-//  user_id         Int
-//  permission_id   Int
-//  auth_permission auth_permission @relation(fields: [permission_id], references: [id])
-//  auth_user       auth_user       @relation(fields: [user_id], references: [id])
-//
-//  @@unique([user_id, permission_id], name: "auth_user_user_permissions_user_id_permission_id_14a6b632_uniq")
-//  @@index([permission_id], name: "auth_user_user_permissions_permission_id_1fbb5f2c")
-//  @@index([user_id], name: "auth_user_user_permissions_user_id_a95ead1b")
-//}
-//
-//model core_author {
-//  id                BigInt              @id @default(autoincrement())
-//  name              String              @db.VarChar(256)
-//  birthYear         Int?
-//  deathYear         Int?
-//  date_added        DateTime            @db.Date
-//  date_modified     DateTime            @db.Date
-//  core_book_authors core_book_authors[]
-//}
-//
-//model core_book {
-//  id                BigInt              @id @default(autoincrement())
-//  fileUrl           String              @db.VarChar(100)
-//  coverImgUrl       String?             @db.VarChar(100)
-//  title             String              @db.VarChar(512)
-//  fileType          String?             @db.VarChar(32)
-//  language          String?             @db.VarChar(24)
-//  copyright         Boolean
-//  date_added        DateTime            @db.Date
-//  date_modified     DateTime            @db.Date
-//  core_book_authors core_book_authors[]
-//  core_book_genres  core_book_genres[]
-//}
-//
-//model core_book_authors {
-//  id          BigInt      @id @default(autoincrement())
-//  book_id     BigInt
-//  author_id   BigInt
-//  core_author core_author @relation(fields: [author_id], references: [id])
-//  core_book   core_book   @relation(fields: [book_id], references: [id])
-//
-//  @@unique([book_id, author_id], name: "core_book_authors_book_id_author_id_e39270c2_uniq")
-//  @@index([author_id], name: "core_book_authors_author_id_de742869")
-//  @@index([book_id], name: "core_book_authors_book_id_d8814d03")
-//}
-//
-//model core_book_genres {
-//  id         BigInt     @id @default(autoincrement())
-//  book_id    BigInt
-//  genre_id   BigInt
-//  core_book  core_book  @relation(fields: [book_id], references: [id])
-//  core_genre core_genre @relation(fields: [genre_id], references: [id])
-//
-//  @@unique([book_id, genre_id], name: "core_book_genres_book_id_genre_id_70b18aed_uniq")
-//  @@index([book_id], name: "core_book_genres_book_id_cd7bacb2")
-//  @@index([genre_id], name: "core_book_genres_genre_id_bfaff822")
-//}
-//
-//model core_genre {
-//  id               BigInt             @id @default(autoincrement())
-//  name             String             @db.VarChar(256)
-//  date_added       DateTime           @db.Date
-//  date_modified    DateTime           @db.Date
-//  core_book_genres core_book_genres[]
-//}
-//
-//model django_admin_log {
-//  id                  Int                  @id @default(autoincrement())
-//  action_time         DateTime             @db.Timestamptz(6)
-//  object_id           String?
-//  object_repr         String               @db.VarChar(200)
-//  action_flag         Int                  @db.SmallInt
-//  change_message      String
-//  content_type_id     Int?
-//  user_id             Int
-//  django_content_type django_content_type? @relation(fields: [content_type_id], references: [id])
-//  auth_user           auth_user            @relation(fields: [user_id], references: [id])
-//
-//  @@index([content_type_id], name: "django_admin_log_content_type_id_c4bce8eb")
-//  @@index([user_id], name: "django_admin_log_user_id_c564eba6")
-//}
-//
-//model django_content_type {
-//  id               Int                @id @default(autoincrement())
-//  app_label        String             @db.VarChar(100)
-//  model            String             @db.VarChar(100)
-//  auth_permission  auth_permission[]
-//  django_admin_log django_admin_log[]
-//
-//  @@unique([app_label, model], name: "django_content_type_app_label_model_76bd3d3b_uniq")
-//}
-//
-//model django_migrations {
-//  id      BigInt   @id @default(autoincrement())
-//  app     String   @db.VarChar(255)
-//  name    String   @db.VarChar(255)
-//  applied DateTime @db.Timestamptz(6)
-//}
-//
-//model django_session {
-//  session_key  String   @id @db.VarChar(40)
-//  session_data String
-//  expire_date  DateTime @db.Timestamptz(6)
-//
-//  @@index([expire_date], name: "django_session_expire_date_a5c62663")
-//  @@index([session_key], name: "django_session_session_key_c0390e0f_like")
-//}
+
+model admin_interface_theme {
+  id                                       Int     @id @default(autoincrement())
+  name                                     String  @unique @db.VarChar(50)
+  active                                   Boolean
+  title                                    String  @db.VarChar(50)
+  title_visible                            Boolean
+  logo                                     String  @db.VarChar(100)
+  logo_visible                             Boolean
+  css_header_background_color              String  @db.VarChar(10)
+  title_color                              String  @db.VarChar(10)
+  css_header_text_color                    String  @db.VarChar(10)
+  css_header_link_color                    String  @db.VarChar(10)
+  css_header_link_hover_color              String  @db.VarChar(10)
+  css_module_background_color              String  @db.VarChar(10)
+  css_module_text_color                    String  @db.VarChar(10)
+  css_module_link_color                    String  @db.VarChar(10)
+  css_module_link_hover_color              String  @db.VarChar(10)
+  css_module_rounded_corners               Boolean
+  css_generic_link_color                   String  @db.VarChar(10)
+  css_generic_link_hover_color             String  @db.VarChar(10)
+  css_save_button_background_color         String  @db.VarChar(10)
+  css_save_button_background_hover_color   String  @db.VarChar(10)
+  css_save_button_text_color               String  @db.VarChar(10)
+  css_delete_button_background_color       String  @db.VarChar(10)
+  css_delete_button_background_hover_color String  @db.VarChar(10)
+  css_delete_button_text_color             String  @db.VarChar(10)
+  css                                      String
+  list_filter_dropdown                     Boolean
+  related_modal_active                     Boolean
+  related_modal_background_color           String  @db.VarChar(10)
+  related_modal_rounded_corners            Boolean
+  logo_color                               String  @db.VarChar(10)
+  recent_actions_visible                   Boolean
+  favicon                                  String  @db.VarChar(100)
+  related_modal_background_opacity         String  @db.VarChar(5)
+  env_name                                 String  @db.VarChar(50)
+  env_visible_in_header                    Boolean
+  env_color                                String  @db.VarChar(10)
+  env_visible_in_favicon                   Boolean
+  related_modal_close_button_visible       Boolean
+  language_chooser_active                  Boolean
+  language_chooser_display                 String  @db.VarChar(10)
+  list_filter_sticky                       Boolean
+  form_pagination_sticky                   Boolean
+  form_submit_sticky                       Boolean
+  css_module_background_selected_color     String  @db.VarChar(10)
+  css_module_link_selected_color           String  @db.VarChar(10)
+
+  @@index([name], name: "admin_interface_theme_name_30bda70f_like")
+}
+
+model auth_group {
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @unique @db.VarChar(150)
+  auth_group_permissions auth_group_permissions[]
+  auth_user_groups       auth_user_groups[]
+
+  @@index([name], name: "auth_group_name_a6ea08ec_like")
+}
+
+model auth_group_permissions {
+  id              BigInt          @id @default(autoincrement())
+  group_id        Int
+  permission_id   Int
+  auth_group      auth_group      @relation(fields: [group_id], references: [id])
+  auth_permission auth_permission @relation(fields: [permission_id], references: [id])
+
+  @@unique([group_id, permission_id], name: "auth_group_permissions_group_id_permission_id_0cd325b0_uniq")
+  @@index([group_id], name: "auth_group_permissions_group_id_b120cbf9")
+  @@index([permission_id], name: "auth_group_permissions_permission_id_84c5c92e")
+}
+
+model auth_permission {
+  id                         Int                          @id @default(autoincrement())
+  name                       String                       @db.VarChar(255)
+  content_type_id            Int
+  codename                   String                       @db.VarChar(100)
+  django_content_type        django_content_type          @relation(fields: [content_type_id], references: [id])
+  auth_group_permissions     auth_group_permissions[]
+  auth_user_user_permissions auth_user_user_permissions[]
+
+  @@unique([content_type_id, codename], name: "auth_permission_content_type_id_codename_01ab375a_uniq")
+  @@index([content_type_id], name: "auth_permission_content_type_id_2f476e4b")
+}
+
+model auth_user {
+  id                         Int                          @id @default(autoincrement())
+  password                   String                       @db.VarChar(128)
+  last_login                 DateTime?                    @db.Timestamptz(6)
+  is_superuser               Boolean
+  username                   String                       @unique @db.VarChar(150)
+  first_name                 String                       @db.VarChar(150)
+  last_name                  String                       @db.VarChar(150)
+  email                      String                       @db.VarChar(254)
+  is_staff                   Boolean
+  is_active                  Boolean
+  date_joined                DateTime                     @db.Timestamptz(6)
+  auth_user_groups           auth_user_groups[]
+  auth_user_user_permissions auth_user_user_permissions[]
+  django_admin_log           django_admin_log[]
+
+  @@index([username], name: "auth_user_username_6821ab7c_like")
+}
+
+model auth_user_groups {
+  id         BigInt     @id @default(autoincrement())
+  user_id    Int
+  group_id   Int
+  auth_group auth_group @relation(fields: [group_id], references: [id])
+  auth_user  auth_user  @relation(fields: [user_id], references: [id])
+
+  @@unique([user_id, group_id], name: "auth_user_groups_user_id_group_id_94350c0c_uniq")
+  @@index([group_id], name: "auth_user_groups_group_id_97559544")
+  @@index([user_id], name: "auth_user_groups_user_id_6a12ed8b")
+}
+
+model auth_user_user_permissions {
+  id              BigInt          @id @default(autoincrement())
+  user_id         Int
+  permission_id   Int
+  auth_permission auth_permission @relation(fields: [permission_id], references: [id])
+  auth_user       auth_user       @relation(fields: [user_id], references: [id])
+
+  @@unique([user_id, permission_id], name: "auth_user_user_permissions_user_id_permission_id_14a6b632_uniq")
+  @@index([permission_id], name: "auth_user_user_permissions_permission_id_1fbb5f2c")
+  @@index([user_id], name: "auth_user_user_permissions_user_id_a95ead1b")
+}
+
+model django_admin_log {
+  id                  Int                  @id @default(autoincrement())
+  action_time         DateTime             @db.Timestamptz(6)
+  object_id           String?
+  object_repr         String               @db.VarChar(200)
+  action_flag         Int                  @db.SmallInt
+  change_message      String
+  content_type_id     Int?
+  user_id             Int
+  django_content_type django_content_type? @relation(fields: [content_type_id], references: [id])
+  auth_user           auth_user            @relation(fields: [user_id], references: [id])
+
+  @@index([content_type_id], name: "django_admin_log_content_type_id_c4bce8eb")
+  @@index([user_id], name: "django_admin_log_user_id_c564eba6")
+}
+
+model django_content_type {
+  id               Int                @id @default(autoincrement())
+  app_label        String             @db.VarChar(100)
+  model            String             @db.VarChar(100)
+  auth_permission  auth_permission[]
+  django_admin_log django_admin_log[]
+
+  @@unique([app_label, model], name: "django_content_type_app_label_model_76bd3d3b_uniq")
+}
+
+model django_migrations {
+  id      BigInt   @id @default(autoincrement())
+  app     String   @db.VarChar(255)
+  name    String   @db.VarChar(255)
+  applied DateTime @db.Timestamptz(6)
+}
+
+model django_session {
+  session_key  String   @id @db.VarChar(40)
+  session_data String
+  expire_date  DateTime @db.Timestamptz(6)
+
+  @@index([expire_date], name: "django_session_expire_date_a5c62663")
+  @@index([session_key], name: "django_session_session_key_c0390e0f_like")
+}
