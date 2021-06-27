@@ -1,9 +1,13 @@
-import { Context } from "../context";
+import { Context, prisma } from "../context";
 import { AuthenticationError } from "apollo-server-errors";
 import { NotFoundError } from "../services/errors/notFoundError";
 import { convertObjectToArrayOfObjects } from "../utils/misc";
 import logger from "../utils/logger";
 import { Booklist } from "./types";
+import {
+    getHighlightBooks,
+    getPopularGenreBasedRecommendations,
+} from "../services/feed";
 
 export const ping = () => "Server Running";
 
@@ -288,4 +292,24 @@ export async function books(parent, args, context: Context): Promise<Booklist> {
         count,
         books,
     };
+}
+
+export async function feed(
+    parent,
+    args,
+    context: Context,
+): Promise<Booklist[]> {
+    const { bookCountEachCategory, categoryCount } = args;
+
+    const feedBookLists: Booklist[] = [];
+    feedBookLists.push(await getHighlightBooks(bookCountEachCategory));
+    feedBookLists.push(
+        // "..." spread syntax to unpack returned array elements and add then to feedBookLists array.
+        ...(await getPopularGenreBasedRecommendations(
+            bookCountEachCategory,
+            categoryCount - 1,
+        )),
+    );
+
+    return feedBookLists;
 }
