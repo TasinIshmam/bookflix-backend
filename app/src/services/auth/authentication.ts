@@ -20,6 +20,8 @@ export function getUserId(req, authToken): number | undefined {
                 if (!token) {
                     throw new AuthenticationError("No token found");
                 }
+
+                //todo check if userId actually exists in DB.
                 const { userId } = getTokenPayload(token);
                 return userId;
             }

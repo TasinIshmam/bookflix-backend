@@ -28,7 +28,7 @@ model Book {
   publisher        String?
   authors          Author[]
   genres           Genre[]
-  readingHistories UserBookInteraction[]
+  readingHistories UserBookInteraction[]  //todo: Change name of field to userBookInteractions
 }
 
 model Genre {
@@ -54,7 +54,7 @@ model User {
   password         String
   createdAt        DateTime                @default(now())
   name             String
-  readingHistories UserBookInteraction[]
+  readingHistories UserBookInteraction[]   //todo: Change name of field to userBookInteractions
   favoriteGenres   FavoriteGenre[]
   favoriteAuthors  UserAuthorInteraction[]
 }
