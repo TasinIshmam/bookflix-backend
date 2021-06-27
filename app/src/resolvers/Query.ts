@@ -191,3 +191,15 @@ export async function myList(parent, args, context: Context) {
         category: "myList",
     };
 }
+
+export async function authors(parent, args, context: Context) {
+    const { paginate, orderBy } = args;
+
+    const authors = await context.prisma.author.findMany({
+        orderBy: convertObjectToArrayOfObjects(orderBy),
+        skip: paginate?.skip,
+        take: paginate?.take,
+    });
+
+    return authors;
+}
