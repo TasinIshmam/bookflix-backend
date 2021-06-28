@@ -153,10 +153,10 @@ export async function setFavoriteGenres(parent, args, context: Context) {
     if (!userId) throw new AuthenticationError("Not logged in");
 
     const { genreIds, operation } = args;
-    let res = [];
+    const intGenreIds = genreIds.map((genreId) => parseInt(genreId));
 
     if (operation === "add") {
-        let data = genreIds.map((genreId) => {
+        let data = intGenreIds.map((genreId) => {
             return {
                 genreId,
                 userId,
@@ -171,7 +171,7 @@ export async function setFavoriteGenres(parent, args, context: Context) {
         let { count } = await prisma.favoriteGenre.deleteMany({
             where: {
                 genreId: {
-                    in: genreIds,
+                    in: intGenreIds,
                 },
                 userId,
             },
