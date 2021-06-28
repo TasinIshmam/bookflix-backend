@@ -103,7 +103,7 @@ type Mutation {
         The list of genre(s) that are to be added/removed in user's favorites.
         Skips genre(s) if it already exists (in case of add operation) or if it dosen't exist (in case of remove operation).
         """
-        genreIds: [Int!]!,
+        genreIds: [ID!]!,
         "Add or Remove specified genre(s)"
         operation: AddOrRemove!)
     : setFavoriteGenreOutput!
@@ -115,10 +115,10 @@ type Mutation {
     setFavoriteBook(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
 
     """
-    Add/Remove a certain author from user's "favorite authors" list.
+    Add/Remove author(s) from user's "favorite authors" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteAuthor(authorId: ID!, operation: AddOrRemove!): UserAuthorInteraction!
+    setFavoriteAuthors(authorIds: [ID!]!, operation: AddOrRemove!): setFavoriteAuthorsOutput!
 
     """
     Add/Remove a certain book from user's Booklist (My List)
@@ -223,6 +223,11 @@ type Genre {
 }
 
 type setFavoriteGenreOutput {
+    "Number of records that were changed (created/deleted)"
+    count : Int!
+}
+
+type setFavoriteAuthorsOutput {
     "Number of records that were changed (created/deleted)"
     count : Int!
 }

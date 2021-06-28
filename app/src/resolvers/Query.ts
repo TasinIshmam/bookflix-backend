@@ -185,7 +185,7 @@ export async function myList(
         },
     );
 
-    // Convert syntax. Eg: [ { bookId: 6 }, { bookId: 5 } ]  =>  [ 6, 5 ]
+    // Convert array shape. Eg: [ { bookId: 6 }, { bookId: 5 } ]  =>  [ 6, 5 ]
     const bookIdArray = myListBookInteractions.map(
         (interaction) => interaction.bookId,
     );
