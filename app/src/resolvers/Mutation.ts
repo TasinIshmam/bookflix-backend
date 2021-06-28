@@ -49,30 +49,76 @@ export async function login(parent, args, context: Context) {
     };
 }
 
-export async function setFavoriteAuthor(parent, args, context: Context) {
+export async function setFavoriteAuthors(parent, args, context: Context) {
     const { userId } = context;
     if (!userId) throw new AuthenticationError("Not logged in");
 
-    const { authorId, operation } = args;
-    const isFavorite = operation === "add";
+    let { authorIds, operation } = args;
+    let intAuthorIds: number[] = authorIds.map((authorId) =>
+        parseInt(authorId),
+    );
 
-    let result = await prisma.userAuthorInteraction.upsert({
-        where: {
-            authorId_userId: {
-                authorId: parseInt(authorId),
+    let res = [];
+
+    if (operation === "add") {
+        // add is an INEFFICIENT OPERATION. Runs one CRUD per author.
+        let alreadyFavorite = await prisma.userAuthorInteraction.count({
+            where: {
+                authorId: {
+                    in: intAuthorIds,
+                },
+                userId: userId,
+                isFavorite: true,
+            },
+        });
+
+        let createdOrUpdatedAuthors = 0; // will include authorInteractions that are ALREADY set to favorite.
+        for (const authorId of intAuthorIds) {
+            await context.prisma.userAuthorInteraction.upsert({
+                where: {
+                    authorId_userId: {
+                        authorId: authorId,
+                        userId: userId,
+                    },
+                },
+                update: {
+                    isFavorite: true,
+                },
+                create: {
+                    authorId: authorId,
+                    userId: userId,
+                    isFavorite: true,
+                },
+            });
+
+            createdOrUpdatedAuthors += 1;
+        }
+        return { count: createdOrUpdatedAuthors - alreadyFavorite };
+    } else if (operation === "remove") {
+        let alreadyNotFavorite = await prisma.userAuthorInteraction.count({
+            where: {
+                authorId: {
+                    in: intAuthorIds,
+                },
+                userId: userId,
+                isFavorite: false,
+            },
+        });
+
+        // count will include authorInteractions that are ALREADY set to NOT favorite.
+        let { count } = await prisma.userAuthorInteraction.updateMany({
+            where: {
+                authorId: {
+                    in: intAuthorIds,
+                },
                 userId: userId,
             },
-        },
-        update: {
-            isFavorite: isFavorite,
-        },
-        create: {
-            authorId: parseInt(authorId),
-            userId: userId,
-            isFavorite: isFavorite,
-        },
-    });
-    return result;
+            data: {
+                isFavorite: false,
+            },
+        });
+        return { count: count - alreadyNotFavorite };
+    } else throw new UserInputError(`Unsupported operation: ${operation}`);
 }
 
 export async function setFavoriteBook(parent, args, context: Context) {
