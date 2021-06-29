@@ -6,6 +6,7 @@ import config from "../config/config";
 import { authTokenPayload } from "../services/auth/authentication";
 import { AuthenticationError, UserInputError } from "apollo-server-errors";
 import { updateReadingHistoryInput } from "./types";
+import logger from "../utils/logger";
 
 export async function signup(parent, args, context: Context) {
     const password = await bcrypt.hash(args.password, 10);
@@ -74,22 +75,31 @@ export async function setFavoriteAuthors(parent, args, context: Context) {
 
         let createdOrUpdatedAuthors = 0; // will include authorInteractions that are ALREADY set to favorite.
         for (const authorId of intAuthorIds) {
-            await context.prisma.userAuthorInteraction.upsert({
-                where: {
-                    authorId_userId: {
+            try {
+                await context.prisma.userAuthorInteraction.upsert({
+                    where: {
+                        authorId_userId: {
+                            authorId: authorId,
+                            userId: userId,
+                        },
+                    },
+                    update: {
+                        isFavorite: true,
+                    },
+                    create: {
                         authorId: authorId,
                         userId: userId,
+                        isFavorite: true,
                     },
-                },
-                update: {
-                    isFavorite: true,
-                },
-                create: {
-                    authorId: authorId,
-                    userId: userId,
-                    isFavorite: true,
-                },
-            });
+                });
+            } catch (e) {
+                if (e.code === "P2003") {
+                    //foreign key constraint because invalid authorId/userId. Ignore this entry and continue with update.
+                    continue;
+                } else {
+                    throw e;
+                }
+            }
 
             createdOrUpdatedAuthors += 1;
         }
@@ -121,31 +131,80 @@ export async function setFavoriteAuthors(parent, args, context: Context) {
     } else throw new UserInputError(`Unsupported operation: ${operation}`);
 }
 
-export async function setFavoriteBook(parent, args, context: Context) {
+export async function setFavoriteBooks(parent, args, context: Context) {
     const { userId } = context;
-    const { bookId, operation } = args;
-
-    const isFavorite = operation === "add";
-
     if (!userId) throw new AuthenticationError("Not logged in");
 
-    let result = await prisma.userBookInteraction.upsert({
-        where: {
-            bookId_userId: {
-                bookId: parseInt(bookId),
+    let { bookIds, operation } = args;
+    let intBookIds: number[] = bookIds.map((bookId) => parseInt(bookId));
+
+    if (operation === "add") {
+        // add is an INEFFICIENT OPERATION. Runs one CRUD per Book.
+        let alreadyFavorite = await prisma.userBookInteraction.count({
+            where: {
+                bookId: {
+                    in: intBookIds,
+                },
+                userId: userId,
+                isFavorite: true,
+            },
+        });
+
+        let createdOrUpdatedBooks = 0; // will include bookInteractions that are ALREADY set to favorite.
+        for (const bookId of intBookIds) {
+            try {
+                await context.prisma.userBookInteraction.upsert({
+                    where: {
+                        bookId_userId: {
+                            bookId: bookId,
+                            userId: userId,
+                        },
+                    },
+                    update: {
+                        isFavorite: true,
+                    },
+                    create: {
+                        bookId: bookId,
+                        userId: userId,
+                        isFavorite: true,
+                    },
+                });
+                createdOrUpdatedBooks += 1;
+            } catch (e) {
+                if (e.code === "P2003") {
+                    //foreign key constraint because invalid bookId. Ignore this entry and continue with update.
+                    continue;
+                } else {
+                    throw e;
+                }
+            }
+        }
+        return { count: createdOrUpdatedBooks - alreadyFavorite };
+    } else if (operation === "remove") {
+        let alreadyNotFavorite = await prisma.userBookInteraction.count({
+            where: {
+                bookId: {
+                    in: intBookIds,
+                },
+                userId: userId,
+                isFavorite: false,
+            },
+        });
+
+        // count will include UserBookInteraction that are ALREADY set to NOT favorite.
+        let { count } = await prisma.userBookInteraction.updateMany({
+            where: {
+                bookId: {
+                    in: intBookIds,
+                },
                 userId: userId,
             },
-        },
-        update: {
-            isFavorite: isFavorite,
-        },
-        create: {
-            bookId: parseInt(bookId),
-            userId: userId,
-            isFavorite: isFavorite,
-        },
-    });
-    return result;
+            data: {
+                isFavorite: false,
+            },
+        });
+        return { count: count - alreadyNotFavorite };
+    } else throw new UserInputError(`Unsupported operation: ${operation}`);
 }
 
 export async function setFavoriteGenres(parent, args, context: Context) {

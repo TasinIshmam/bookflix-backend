@@ -106,19 +106,19 @@ type Mutation {
         genreIds: [ID!]!,
         "Add or Remove specified genre(s)"
         operation: AddOrRemove!)
-    : setFavoriteGenreOutput!
+    : setFavoritesOutput!
 
     """
-    Add/Remove a certain book from user's "favorite" list.
+    Add/Remove certain book(s) from user's "favorite" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteBook(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
+    setFavoriteBooks(bookIds: [ID!]!, operation: AddOrRemove!): setFavoritesOutput!
 
     """
     Add/Remove author(s) from user's "favorite authors" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteAuthors(authorIds: [ID!]!, operation: AddOrRemove!): setFavoriteAuthorsOutput!
+    setFavoriteAuthors(authorIds: [ID!]!, operation: AddOrRemove!): setFavoritesOutput!
 
     """
     Add/Remove a certain book from user's Booklist (My List)
@@ -222,14 +222,9 @@ type Genre {
     name: String
 }
 
-type setFavoriteGenreOutput {
+type setFavoritesOutput {
     "Number of records that were changed (created/deleted)"
-    count : Int!
-}
-
-type setFavoriteAuthorsOutput {
-    "Number of records that were changed (created/deleted)"
-    count : Int!
+    count: Int!
 }
 
 enum FileType {
