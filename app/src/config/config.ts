@@ -27,6 +27,9 @@ const config = {
     logger: {
         logLevel: process.env.LOG_LEVEL || "info",
     },
+    feed: {
+        highlightBookCount: 3,
+    },
 };
 
 export default config;

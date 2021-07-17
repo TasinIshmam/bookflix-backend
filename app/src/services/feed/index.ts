@@ -1,14 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { Booklist } from "../../resolvers/types";
-import { prisma } from "../../context";
+import { Context, prisma } from "../../context";
 import logger from "../../utils/logger";
-import { shuffle } from "../../utils/misc";
+import { convertObjectToArrayOfObjects, shuffle } from "../../utils/misc";
 
 /**
  * Returns books for the hero section. Currently returns the highest rated n books.
- * @param count Number of books to return
+ * @param bookCount Number of books to return
  */
-export async function getHighlightBooks(count: number): Promise<Booklist> {
+export async function getHighlightBooks(bookCount: number): Promise<Booklist> {
     const books = await prisma.book.findMany({
         orderBy: {
             rating: "desc",
@@ -18,13 +18,13 @@ export async function getHighlightBooks(count: number): Promise<Booklist> {
                 rating: null,
             },
         },
-        take: count,
+        take: bookCount,
     });
 
     return {
-        id: `highlight-${count}`,
+        id: `highlight-${bookCount}`,
         books: shuffle(books),
-        count: count,
+        count: bookCount,
         category: "Top Picks",
     };
 }
@@ -39,6 +39,7 @@ export async function getPopularGenreBasedRecommendations(
     bookCountEachCategory: number,
     categoryCount: number,
 ): Promise<Booklist[]> {
+    // get a number of genres
     const genres = await prisma.genre.findMany({
         take: categoryCount,
         orderBy: {
@@ -50,9 +51,10 @@ export async function getPopularGenreBasedRecommendations(
             books: true,
         },
     });
-    // logger.debug(JSON.stringify(genres, undefined, 4));
+    // shuffle order
     let shuffledGenres = shuffle(genres);
 
+    // get a booklist for each genre.
     const genreBasedBookLists: Booklist[] = shuffledGenres.map(
         (genreWithBooks) => {
             let numberOfBooksToTake = Math.min(
@@ -72,4 +74,51 @@ export async function getPopularGenreBasedRecommendations(
     );
 
     return genreBasedBookLists;
+}
+
+/**
+ * Get books from that the user has started reading (but not finished).
+ * Order is randomized
+ * @param bookCount Maximum number of books to return.
+ * @param context userId and Prisma instance
+ */
+export async function getBooksThatUserIsCurrentlyReading(
+    bookCount: number,
+    context: Context,
+): Promise<Booklist> {
+    const { userId } = context;
+
+    const currentlyReading = await context.prisma.userBookInteraction.findMany({
+        where: {
+            userId: userId,
+            isFinishedReading: false,
+            currentPage: {
+                gt: 1,
+            },
+        },
+        select: { bookId: true },
+    });
+
+    // Convert syntax. Eg: [ { bookId: 6 }, { bookId: 5 } ]  =>  [ 6, 5 ]
+    const bookIdArray = currentlyReading.map(
+        (interaction) => interaction.bookId,
+    );
+
+    //generate search condition
+    const bookSearchCondition = { id: { in: bookIdArray } };
+
+    const books = await context.prisma.book.findMany({
+        where: bookSearchCondition,
+    });
+
+    let numberOfBooksToTake = Math.min(bookCount, books.length);
+    // shuffle books and take bookCount number of them.
+    let shuffledBooks = shuffle(books).slice(0, numberOfBooksToTake);
+
+    return {
+        id: `currentlyReading-${userId}-${bookCount}`,
+        books: shuffledBooks, // return books in random order
+        count: numberOfBooksToTake,
+        category: `Continue reading:`,
+    };
 }

@@ -171,6 +171,8 @@ type UserBookInteraction {
     lastUpdate: DateTime!
     isFavorite: Boolean!
     isOnReadLaterList: Boolean!
+    currentPageLocation: String
+
 }
 
 type UserAuthorInteraction {
@@ -282,6 +284,7 @@ input PaginationInput {
 input updateReadingHistoryInput {
     currentPage: Int
     isFinishedReading: Boolean
+    currentPageLocation: String
 }
 
 enum Sort {

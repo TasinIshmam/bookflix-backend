@@ -1,13 +1,15 @@
 import { Context, prisma } from "../context";
 import { AuthenticationError } from "apollo-server-errors";
 import { NotFoundError } from "../services/errors/notFoundError";
-import { convertObjectToArrayOfObjects } from "../utils/misc";
+import { convertObjectToArrayOfObjects, shuffle } from "../utils/misc";
 import logger from "../utils/logger";
 import { Booklist } from "./types";
 import {
+    getBooksThatUserIsCurrentlyReading,
     getHighlightBooks,
     getPopularGenreBasedRecommendations,
 } from "../services/feed";
+import config from "../config/config";
 
 export const ping = () => "Server Running";
 
@@ -314,14 +316,26 @@ export async function feed(
 ): Promise<Booklist[]> {
     const { bookCountEachCategory, categoryCount } = args;
 
-    const feedBookLists: Booklist[] = [];
-    feedBookLists.push(await getHighlightBooks(bookCountEachCategory));
+    let feedBookLists: Booklist[] = [];
+    feedBookLists.push(
+        await getBooksThatUserIsCurrentlyReading(
+            bookCountEachCategory,
+            context,
+        ),
+    );
+
     feedBookLists.push(
         // "..." spread syntax to unpack returned array elements and add then to feedBookLists array.
         ...(await getPopularGenreBasedRecommendations(
             bookCountEachCategory,
             categoryCount - 1,
         )),
+    );
+
+    feedBookLists = shuffle(feedBookLists);
+
+    feedBookLists.unshift(
+        await getHighlightBooks(config.feed.highlightBookCount),
     );
 
     return feedBookLists;
