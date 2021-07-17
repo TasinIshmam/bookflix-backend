@@ -178,7 +178,7 @@ export async function favoriteBooks(
     };
 }
 
-export async function myList(
+export async function readLaterList(
     parent,
     args,
     context: Context,
@@ -188,18 +188,18 @@ export async function myList(
     const { paginate, orderBy } = args;
 
     // get the book Ids of user's favorite books.
-    const myListBookInteractions = await context.prisma.userBookInteraction.findMany(
+    const readLaterBookInteractions = await context.prisma.userBookInteraction.findMany(
         {
             where: {
                 userId: userId,
-                isOnMyList: true,
+                isOnReadLaterList: true,
             },
             select: { bookId: true },
         },
     );
 
     // Convert array shape. Eg: [ { bookId: 6 }, { bookId: 5 } ]  =>  [ 6, 5 ]
-    const bookIdArray = myListBookInteractions.map(
+    const bookIdArray = readLaterBookInteractions.map(
         (interaction) => interaction.bookId,
     );
 
@@ -218,10 +218,10 @@ export async function myList(
     });
 
     return {
-        id: `myList-${userId}:` + JSON.stringify(args),
+        id: `readLater-${userId}:` + JSON.stringify(args),
         books,
         count,
-        category: "myList",
+        category: "readLater",
     };
 }
 

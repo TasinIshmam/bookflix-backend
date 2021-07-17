@@ -239,11 +239,11 @@ export async function setFavoriteGenres(parent, args, context: Context) {
     } else throw new UserInputError(`Unsupported operation: ${operation}`);
 }
 
-export async function setBookToMyList(parent, args, context: Context) {
+export async function setBookToReadLater(parent, args, context: Context) {
     const { userId } = context;
     const { bookId, operation } = args;
 
-    const isOnMyList = operation === "add";
+    const isOnReadLaterList = operation === "add";
 
     if (!userId) throw new AuthenticationError("Not logged in");
 
@@ -255,12 +255,12 @@ export async function setBookToMyList(parent, args, context: Context) {
             },
         },
         update: {
-            isOnMyList: isOnMyList,
+            isOnReadLaterList: isOnReadLaterList,
         },
         create: {
             bookId: parseInt(bookId),
             userId: userId,
-            isOnMyList: isOnMyList,
+            isOnReadLaterList: isOnReadLaterList,
         },
     });
 

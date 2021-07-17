@@ -72,7 +72,7 @@ model UserBookInteraction {
   startDate         DateTime @default(now())
   lastUpdate        DateTime @updatedAt
   isFavorite        Boolean  @default(false)
-  isOnMyList        Boolean  @default(false)
+  isOnReadLaterList        Boolean  @default(false)  @map("isOnMyList")   //refactored myList to readLaterList
 
   @@unique([bookId, userId])
 }
