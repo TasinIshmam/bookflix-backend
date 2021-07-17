@@ -80,19 +80,28 @@ export async function search(parent, args, context: Context) {
         ? {
               OR: [
                   {
-                      title: { contains: args.filter },
+                      title: {
+                          contains: filter as string,
+                          mode: "insensitive",
+                      },
                   },
                   {
                       authors: {
                           some: {
-                              name: { contains: args.filter },
+                              name: {
+                                  contains: filter as string,
+                                  mode: "insensitive",
+                              },
                           },
                       },
                   },
                   {
                       genres: {
                           some: {
-                              name: { contains: args.filter },
+                              name: {
+                                  contains: filter as string,
+                                  mode: "insensitive",
+                              },
                           },
                       },
                   },
@@ -102,13 +111,17 @@ export async function search(parent, args, context: Context) {
 
     // optional chaining syntax used for skip and take. Ref: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#optional-chaining
     const results = await context.prisma.book.findMany({
+        // @ts-ignore
         where,
         orderBy: convertObjectToArrayOfObjects(orderBy),
         skip: paginate?.skip,
         take: paginate?.take,
     });
 
-    const count = await context.prisma.book.count({ where });
+    const count = await context.prisma.book.count({
+        // @ts-ignore
+        where,
+    });
 
     return {
         id: "search-" + JSON.stringify(args),
