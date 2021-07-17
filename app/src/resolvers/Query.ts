@@ -5,6 +5,7 @@ import { convertObjectToArrayOfObjects, shuffle } from "../utils/misc";
 import logger from "../utils/logger";
 import { Booklist } from "./types";
 import {
+    getBooksByUsersFavoriteAuthors,
     getBooksThatUserIsCurrentlyReading,
     getHighlightBooks,
     getPopularGenreBasedRecommendations,
@@ -325,6 +326,13 @@ export async function feed(
     );
 
     feedBookLists.push(
+        ...(await getBooksByUsersFavoriteAuthors(
+            bookCountEachCategory,
+            context,
+        )),
+    );
+
+    feedBookLists.push(
         // "..." spread syntax to unpack returned array elements and add then to feedBookLists array.
         ...(await getPopularGenreBasedRecommendations(
             bookCountEachCategory,
@@ -338,6 +346,10 @@ export async function feed(
     feedBookLists.unshift(
         await getHighlightBooks(config.feed.highlightBookCount, context),
     );
+
+    feedBookLists = feedBookLists.filter((bookListEntry: Booklist) => {
+        return bookListEntry.books.length !== 0;
+    });
 
     return feedBookLists;
 }

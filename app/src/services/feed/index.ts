@@ -3,6 +3,7 @@ import { Booklist } from "../../resolvers/types";
 import { Context } from "../../context";
 import logger from "../../utils/logger";
 import { convertObjectToArrayOfObjects, shuffle } from "../../utils/misc";
+import { favoriteAuthors } from "../../resolvers/models/User";
 
 /**
  * Returns books for the hero section. Currently returns the highest rated n books.
@@ -61,8 +62,8 @@ export async function getPopularGenreBasedRecommendations(
     let shuffledGenres = shuffle(genres);
 
     // get a booklist for each genre.
-    const genreBasedBookLists: Booklist[] = shuffledGenres.map(
-        (genreWithBooks) => {
+    const genreBasedBookLists: Booklist[] = shuffledGenres
+        .map((genreWithBooks) => {
             let numberOfBooksToTake = Math.min(
                 bookCountEachCategory,
                 genreWithBooks.books.length,
@@ -76,8 +77,10 @@ export async function getPopularGenreBasedRecommendations(
                 count: numberOfBooksToTake,
                 category: `Try books of genre: ${genreWithBooks.name}`,
             };
-        },
-    );
+        })
+        .filter((bookListEntry: Booklist) => {
+            return bookListEntry.books.length !== 0;
+        });
 
     return genreBasedBookLists;
 }
@@ -127,4 +130,53 @@ export async function getBooksThatUserIsCurrentlyReading(
         count: numberOfBooksToTake,
         category: `Continue reading:`,
     };
+}
+
+export async function getBooksByUsersFavoriteAuthors(
+    bookCountEachCategory: number,
+    context: Context,
+): Promise<Booklist[]> {
+    // shape of return type:  [{ author: { name: "String", books: Book[]}}]
+    let favoriteAuthorsAndBooks = await context.prisma.userAuthorInteraction.findMany(
+        {
+            where: {
+                userId: context.userId,
+                isFavorite: true,
+            },
+            select: {
+                author: {
+                    select: {
+                        name: true,
+                        books: true,
+                    },
+                },
+            },
+        },
+    );
+
+    favoriteAuthorsAndBooks = shuffle(favoriteAuthorsAndBooks);
+
+    const favoriteAuthorBasedBooklists: Booklist[] = favoriteAuthorsAndBooks.map(
+        ({ author }) => {
+            let numberOfBooksToTake = Math.min(
+                bookCountEachCategory,
+                author.books.length,
+            );
+
+            const authorName = author.name;
+            const shuffledBooks = shuffle(author.books).slice(
+                0,
+                numberOfBooksToTake,
+            );
+
+            return {
+                id: `favoriteAuthor-${authorName}-${context.userId}-${bookCountEachCategory}`,
+                books: shuffledBooks,
+                count: numberOfBooksToTake,
+                category: `More from your favorite Author ${authorName}`,
+            };
+        },
+    );
+
+    return favoriteAuthorBasedBooklists;
 }
