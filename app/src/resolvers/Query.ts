@@ -10,11 +10,7 @@ import logger from "../utils/logger";
 import { Booklist } from "./types";
 import {
     generateFeedBookLists,
-    getBooksByUsersFavoriteAuthors,
-    getBooksFromUsersFavoriteGenres,
-    getBooksThatUserIsCurrentlyReading,
     getHighlightBooks,
-    getPopularGenreBasedRecommendations,
 } from "../services/feed/feed";
 import config from "../config/config";
 
@@ -328,9 +324,6 @@ export async function feed(
         categoryCount,
         context,
     );
-
-    // shuffle and randomize order of lists
-    feedBookLists = shuffle(feedBookLists);
 
     // highlight/hero unit section books at the top
     feedBookLists.unshift(

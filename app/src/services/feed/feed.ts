@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { Booklist } from "../../resolvers/types";
 import { Context } from "../../context";
 import logger from "../../utils/logger";
 import { convertObjectToArrayOfObjects, shuffle } from "../../utils/misc";
-import { favoriteAuthors } from "../../resolvers/models/User";
 import config from "../../config/config";
 
 /**
