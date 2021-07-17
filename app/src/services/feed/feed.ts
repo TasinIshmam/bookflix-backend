@@ -180,3 +180,88 @@ export async function getBooksByUsersFavoriteAuthors(
 
     return favoriteAuthorBasedBooklists;
 }
+
+export async function getBooksFromUsersFavoriteGenres(
+    bookCountEachCategory: number,
+    context: Context,
+): Promise<Booklist[]> {
+    // shape of return type:  [{ author: { name: "String", books: Book[]}}]
+    let favoriteGenresAndBooks = await context.prisma.favoriteGenre.findMany({
+        where: {
+            userId: context.userId,
+        },
+        select: {
+            genre: {
+                select: {
+                    name: true,
+                    books: true,
+                },
+            },
+        },
+    });
+
+    favoriteGenresAndBooks = shuffle(favoriteGenresAndBooks);
+
+    const favoriteGenreBasedBookLists: Booklist[] = favoriteGenresAndBooks.map(
+        ({ genre }) => {
+            let numberOfBooksToTake = Math.min(
+                bookCountEachCategory,
+                genre.books.length,
+            );
+
+            const genreName = genre.name;
+            const shuffledBooks = shuffle(genre.books).slice(
+                0,
+                numberOfBooksToTake,
+            );
+
+            return {
+                id: `genre-${genreName}-${bookCountEachCategory}`,
+                books: shuffledBooks,
+                count: numberOfBooksToTake,
+                category: `Because you like Genre ${genreName}`,
+            };
+        },
+    );
+
+    return favoriteGenreBasedBookLists;
+}
+
+export async function generateFeedBookLists(
+    bookCountEachCategory: number,
+    categoryCount: number,
+    context: Context,
+) {
+    let feedBookLists: Booklist[] = [];
+    feedBookLists.push(
+        await getBooksThatUserIsCurrentlyReading(
+            bookCountEachCategory,
+            context,
+        ),
+    );
+
+    feedBookLists.push(
+        ...(await getBooksByUsersFavoriteAuthors(
+            bookCountEachCategory,
+            context,
+        )),
+    );
+
+    feedBookLists.push(
+        ...(await getBooksFromUsersFavoriteGenres(
+            bookCountEachCategory,
+            context,
+        )),
+    );
+
+    feedBookLists.push(
+        // "..." spread syntax to unpack returned array elements and add then to feedBookLists array.
+        ...(await getPopularGenreBasedRecommendations(
+            bookCountEachCategory,
+            categoryCount - 1,
+            context,
+        )),
+    );
+
+    return shuffle(feedBookLists);
+}

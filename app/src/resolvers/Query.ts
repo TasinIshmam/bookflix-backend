@@ -5,11 +5,13 @@ import { convertObjectToArrayOfObjects, shuffle } from "../utils/misc";
 import logger from "../utils/logger";
 import { Booklist } from "./types";
 import {
+    generateFeedBookLists,
     getBooksByUsersFavoriteAuthors,
+    getBooksFromUsersFavoriteGenres,
     getBooksThatUserIsCurrentlyReading,
     getHighlightBooks,
     getPopularGenreBasedRecommendations,
-} from "../services/feed";
+} from "../services/feed/feed";
 import config from "../config/config";
 
 export const ping = () => "Server Running";
@@ -317,36 +319,21 @@ export async function feed(
 ): Promise<Booklist[]> {
     const { bookCountEachCategory, categoryCount } = args;
 
-    let feedBookLists: Booklist[] = [];
-    feedBookLists.push(
-        await getBooksThatUserIsCurrentlyReading(
-            bookCountEachCategory,
-            context,
-        ),
+    let feedBookLists: Booklist[] = await generateFeedBookLists(
+        bookCountEachCategory,
+        categoryCount,
+        context,
     );
 
-    feedBookLists.push(
-        ...(await getBooksByUsersFavoriteAuthors(
-            bookCountEachCategory,
-            context,
-        )),
-    );
-
-    feedBookLists.push(
-        // "..." spread syntax to unpack returned array elements and add then to feedBookLists array.
-        ...(await getPopularGenreBasedRecommendations(
-            bookCountEachCategory,
-            categoryCount - 1,
-            context,
-        )),
-    );
-
+    // shuffle and randomize
     feedBookLists = shuffle(feedBookLists);
 
+    // highlight/hero unit section books at the top
     feedBookLists.unshift(
         await getHighlightBooks(config.feed.highlightBookCount, context),
     );
 
+    // filter out lists that have 0 books.
     feedBookLists = feedBookLists.filter((bookListEntry: Booklist) => {
         return bookListEntry.books.length !== 0;
     });

@@ -32,3 +32,21 @@ export function shuffle<E>(arrayToShuffle: E[]): E[] {
     }
     return arrayToShuffle;
 }
+
+/**
+ * Remove duplicate objects which have matching value of object[idFieldName]
+ * Source: https://stackoverflow.com/questions/2218999/how-to-remove-all-duplicates-from-an-array-of-objects
+ * @param arrayOfObjects
+ * @param idFieldName
+ */
+export function removeDuplicatesFromArray<E>(
+    arrayOfObjects: E[],
+    idFieldName: string,
+): E[] {
+    let idMap = arrayOfObjects.map((entry) => entry[idFieldName]);
+
+    let filtered = arrayOfObjects.filter(
+        (entry, index) => !idMap.includes(entry[idFieldName], index + 1),
+    );
+    return filtered;
+}
