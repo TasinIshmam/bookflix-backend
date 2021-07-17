@@ -1,7 +1,11 @@
 import { Context, prisma } from "../context";
 import { AuthenticationError } from "apollo-server-errors";
 import { NotFoundError } from "../services/errors/notFoundError";
-import { convertObjectToArrayOfObjects, shuffle } from "../utils/misc";
+import {
+    convertObjectToArrayOfObjects,
+    removeDuplicatesFromArray,
+    shuffle,
+} from "../utils/misc";
 import logger from "../utils/logger";
 import { Booklist } from "./types";
 import {
@@ -325,7 +329,7 @@ export async function feed(
         context,
     );
 
-    // shuffle and randomize
+    // shuffle and randomize order of lists
     feedBookLists = shuffle(feedBookLists);
 
     // highlight/hero unit section books at the top
@@ -337,6 +341,8 @@ export async function feed(
     feedBookLists = feedBookLists.filter((bookListEntry: Booklist) => {
         return bookListEntry.books.length !== 0;
     });
+
+    feedBookLists = removeDuplicatesFromArray(feedBookLists, "id");
 
     return feedBookLists;
 }

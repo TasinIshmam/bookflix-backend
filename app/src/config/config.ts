@@ -29,6 +29,8 @@ const config = {
     },
     feed: {
         highlightBookCount: 3,
+        maxGenreBasedLists: 5,
+        extraCategoriesForRandomization: 5, // a few extra categories. Used to make the feed non-deterministic
     },
 };
 
