@@ -329,13 +329,14 @@ export async function feed(
         ...(await getPopularGenreBasedRecommendations(
             bookCountEachCategory,
             categoryCount - 1,
+            context,
         )),
     );
 
     feedBookLists = shuffle(feedBookLists);
 
     feedBookLists.unshift(
-        await getHighlightBooks(config.feed.highlightBookCount),
+        await getHighlightBooks(config.feed.highlightBookCount, context),
     );
 
     return feedBookLists;

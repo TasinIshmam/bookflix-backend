@@ -1,15 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 import { Booklist } from "../../resolvers/types";
-import { Context, prisma } from "../../context";
+import { Context } from "../../context";
 import logger from "../../utils/logger";
 import { convertObjectToArrayOfObjects, shuffle } from "../../utils/misc";
 
 /**
  * Returns books for the hero section. Currently returns the highest rated n books.
  * @param bookCount Number of books to return
+ * @param context provides prisma instance
  */
-export async function getHighlightBooks(bookCount: number): Promise<Booklist> {
-    const books = await prisma.book.findMany({
+export async function getHighlightBooks(
+    bookCount: number,
+    context: Context,
+): Promise<Booklist> {
+    const books = await context.prisma.book.findMany({
         orderBy: {
             rating: "desc",
         },
@@ -34,13 +38,15 @@ export async function getHighlightBooks(bookCount: number): Promise<Booklist> {
  * Genres chosen based on number of books in that genre.
  * @param categoryCount Number of genres to return
  * @param bookCountEachCategory Number of books to return for each genre. (Might be less if the genre does not support this many books).
+ * @param context provides prisma instance
  */
 export async function getPopularGenreBasedRecommendations(
     bookCountEachCategory: number,
     categoryCount: number,
+    context: Context,
 ): Promise<Booklist[]> {
     // get a number of genres
-    const genres = await prisma.genre.findMany({
+    const genres = await context.prisma.genre.findMany({
         take: categoryCount,
         orderBy: {
             books: {
@@ -77,10 +83,10 @@ export async function getPopularGenreBasedRecommendations(
 }
 
 /**
- * Get books from that the user has started reading (but not finished).
+ * Get books that the user has started reading (but not finished).
  * Order is randomized
  * @param bookCount Maximum number of books to return.
- * @param context userId and Prisma instance
+ * @param context provides userId and Prisma instance
  */
 export async function getBooksThatUserIsCurrentlyReading(
     bookCount: number,
@@ -117,7 +123,7 @@ export async function getBooksThatUserIsCurrentlyReading(
 
     return {
         id: `currentlyReading-${userId}-${bookCount}`,
-        books: shuffledBooks, // return books in random order
+        books: shuffledBooks,
         count: numberOfBooksToTake,
         category: `Continue reading:`,
     };
