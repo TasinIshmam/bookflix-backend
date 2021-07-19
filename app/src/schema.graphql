@@ -40,10 +40,10 @@ type Query {
     favoriteBooks( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
 
     """
-    Get user's book reading history for books in user's Booklist (My List)
+    Get user's book reading history for books in user's read later list
     Authentication: Required  (Used to determine userId)
     """
-    myList( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
+    readLaterList( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
 
     """
     Get a user's reading history/interaction with a certain book.
@@ -121,10 +121,10 @@ type Mutation {
     setFavoriteAuthors(authorIds: [ID!]!, operation: AddOrRemove!): setFavoritesOutput!
 
     """
-    Add/Remove a certain book from user's Booklist (My List)
+    Add/Remove a certain book from user's read later list
     Authentication: Required  (Used to determine userId)
     """
-    setBookToMyList(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
+    setBookToReadLater(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
 
     """
     Update a user's reading history for a certain book.
@@ -170,7 +170,9 @@ type UserBookInteraction {
     startDate: DateTime!
     lastUpdate: DateTime!
     isFavorite: Boolean!
-    isOnMyList: Boolean!
+    isOnReadLaterList: Boolean!
+    currentPageLocation: String
+
 }
 
 type UserAuthorInteraction {
@@ -282,6 +284,7 @@ input PaginationInput {
 input updateReadingHistoryInput {
     currentPage: Int
     isFinishedReading: Boolean
+    currentPageLocation: String
 }
 
 enum Sort {

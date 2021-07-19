@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["orderByRelation"]
 
 }
@@ -30,7 +30,7 @@ model Book {
   publisher        String?
   authors          Author[]
   genres           Genre[]
-  readingHistories UserBookInteraction[]  //todo: Change name of field to userBookInteractions
+  readingHistories UserBookInteraction[] //todo: Change name of field to userBookInteractions
 }
 
 model Genre {
@@ -56,23 +56,24 @@ model User {
   password         String
   createdAt        DateTime                @default(now())
   name             String
-  readingHistories UserBookInteraction[]   //todo: Change name of field to userBookInteractions
+  readingHistories UserBookInteraction[] //todo: Change name of field to userBookInteractions
   favoriteGenres   FavoriteGenre[]
   favoriteAuthors  UserAuthorInteraction[]
 }
 
 model UserBookInteraction {
-  id                Int      @id @default(autoincrement())
-  book              Book     @relation(fields: [bookId], references: [id])
-  bookId            Int
-  user              User     @relation(fields: [userId], references: [id])
-  userId            Int
-  currentPage       Int      @default(1)
-  isFinishedReading Boolean  @default(false)
-  startDate         DateTime @default(now())
-  lastUpdate        DateTime @updatedAt
-  isFavorite        Boolean  @default(false)
-  isOnMyList        Boolean  @default(false)
+  id                  Int      @id @default(autoincrement())
+  book                Book     @relation(fields: [bookId], references: [id])
+  bookId              Int
+  user                User     @relation(fields: [userId], references: [id])
+  userId              Int
+  currentPage         Int      @default(1)
+  currentPageLocation String?
+  isFinishedReading   Boolean  @default(false)
+  startDate           DateTime @default(now())
+  lastUpdate          DateTime @updatedAt
+  isFavorite          Boolean  @default(false)
+  isOnReadLaterList   Boolean  @default(false) @map("isOnMyList") //refactored myList to readLaterList
 
   @@unique([bookId, userId])
 }
