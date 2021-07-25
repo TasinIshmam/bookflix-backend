@@ -10,11 +10,8 @@ import logger from "../utils/logger";
 import { Booklist } from "./types";
 import {
     generateFeedBookLists,
-    getBooksByUsersFavoriteAuthors,
-    getBooksFromUsersFavoriteGenres,
     getBooksThatUserIsCurrentlyReading,
     getHighlightBooks,
-    getPopularGenreBasedRecommendations,
 } from "../services/feed/feed";
 import config from "../config/config";
 
@@ -79,6 +76,17 @@ export async function userBookInteraction(parent, args, context: Context) {
         },
         rejectOnNotFound: true,
     });
+
+    let bookInteraction2 = await context.prisma.userBookInteraction.update({
+        where: {
+            bookId_userId: {
+                bookId: parseInt(bookId),
+                userId: userId,
+            },
+        },
+        data: {},
+    });
+
     return bookInteraction;
 }
 
@@ -329,9 +337,12 @@ export async function feed(
         context,
     );
 
-    // shuffle and randomize order of lists
-    feedBookLists = shuffle(feedBookLists);
-
+    feedBookLists.unshift(
+        await getBooksThatUserIsCurrentlyReading(
+            bookCountEachCategory,
+            context,
+        ),
+    );
     // highlight/hero unit section books at the top
     feedBookLists.unshift(
         await getHighlightBooks(config.feed.highlightBookCount, context),
