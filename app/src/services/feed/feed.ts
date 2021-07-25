@@ -74,7 +74,7 @@ export async function getPopularGenreBasedRecommendations(
                     genreWithBooks.books.slice(0, numberOfBooksToTake),
                 ), // return books in random order
                 count: numberOfBooksToTake,
-                category: `Try books of genre: ${genreWithBooks.name}`,
+                category: `Try ${genreWithBooks.name} books`,
             };
         })
         .filter((bookListEntry: Booklist) => {
@@ -291,7 +291,7 @@ export async function getBooksFromUsersFavoriteGenres(
                 id: `feed-genre-${genreName}-${bookCountEachCategory}`,
                 books: shuffledBooks,
                 count: numberOfBooksToTake,
-                category: `Because you like Genre ${genreName}`,
+                category: `Because you like ${genreName}`,
             };
         },
     );
@@ -305,12 +305,6 @@ export async function generateFeedBookLists(
     context: Context,
 ) {
     let feedBookLists: Booklist[] = [];
-    feedBookLists.push(
-        await getBooksThatUserIsCurrentlyReading(
-            bookCountEachCategory,
-            context,
-        ),
-    );
 
     feedBookLists.push(await getFavoriteBooks(bookCountEachCategory, context));
 
