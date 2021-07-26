@@ -51,6 +51,7 @@
     "doubleQuote": true,
     "semi": true,
     "tabWidth": 4,
-    "trailingComma": "all"
+    "trailingComma": "all",
+    "printWidth": 80
   }
 }

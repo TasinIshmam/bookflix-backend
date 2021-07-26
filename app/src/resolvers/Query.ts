@@ -1,8 +1,19 @@
-import { Context } from "../context";
+import { Context, prisma } from "../context";
 import { AuthenticationError } from "apollo-server-errors";
 import { NotFoundError } from "../services/errors/notFoundError";
-import { convertObjectToArrayOfObjects } from "../utils/misc";
+import {
+    convertObjectToArrayOfObjects,
+    removeDuplicatesFromArray,
+    shuffle,
+} from "../utils/misc";
 import logger from "../utils/logger";
+import { Booklist } from "./types";
+import {
+    generateFeedBookLists,
+    getBooksThatUserIsCurrentlyReading,
+    getHighlightBooks,
+} from "../services/feed/feed";
+import config from "../config/config";
 
 export const ping = () => "Server Running";
 
@@ -65,6 +76,17 @@ export async function userBookInteraction(parent, args, context: Context) {
         },
         rejectOnNotFound: true,
     });
+
+    let bookInteraction2 = await context.prisma.userBookInteraction.update({
+        where: {
+            bookId_userId: {
+                bookId: parseInt(bookId),
+                userId: userId,
+            },
+        },
+        data: {},
+    });
+
     return bookInteraction;
 }
 
@@ -75,19 +97,28 @@ export async function search(parent, args, context: Context) {
         ? {
               OR: [
                   {
-                      title: { contains: args.filter },
+                      title: {
+                          contains: filter as string,
+                          mode: "insensitive",
+                      },
                   },
                   {
                       authors: {
                           some: {
-                              name: { contains: args.filter },
+                              name: {
+                                  contains: filter as string,
+                                  mode: "insensitive",
+                              },
                           },
                       },
                   },
                   {
                       genres: {
                           some: {
-                              name: { contains: args.filter },
+                              name: {
+                                  contains: filter as string,
+                                  mode: "insensitive",
+                              },
                           },
                       },
                   },
@@ -97,13 +128,17 @@ export async function search(parent, args, context: Context) {
 
     // optional chaining syntax used for skip and take. Ref: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#optional-chaining
     const results = await context.prisma.book.findMany({
+        // @ts-ignore
         where,
         orderBy: convertObjectToArrayOfObjects(orderBy),
         skip: paginate?.skip,
         take: paginate?.take,
     });
 
-    const count = await context.prisma.book.count({ where });
+    const count = await context.prisma.book.count({
+        // @ts-ignore
+        where,
+    });
 
     return {
         id: "search-" + JSON.stringify(args),
@@ -113,7 +148,11 @@ export async function search(parent, args, context: Context) {
     };
 }
 
-export async function favoriteBooks(parent, args, context: Context) {
+export async function favoriteBooks(
+    parent,
+    args,
+    context: Context,
+): Promise<Booklist> {
     const { userId } = context;
     if (!userId) throw new AuthenticationError("Not logged in");
     const { paginate, orderBy } = args;
@@ -156,24 +195,28 @@ export async function favoriteBooks(parent, args, context: Context) {
     };
 }
 
-export async function myList(parent, args, context: Context) {
+export async function readLaterList(
+    parent,
+    args,
+    context: Context,
+): Promise<Booklist> {
     const { userId } = context;
     if (!userId) throw new AuthenticationError("Not logged in");
     const { paginate, orderBy } = args;
 
     // get the book Ids of user's favorite books.
-    const myListBookInteractions = await context.prisma.userBookInteraction.findMany(
+    const readLaterBookInteractions = await context.prisma.userBookInteraction.findMany(
         {
             where: {
                 userId: userId,
-                isOnMyList: true,
+                isOnReadLaterList: true,
             },
             select: { bookId: true },
         },
     );
 
-    // Convert syntax. Eg: [ { bookId: 6 }, { bookId: 5 } ]  =>  [ 6, 5 ]
-    const bookIdArray = myListBookInteractions.map(
+    // Convert array shape. Eg: [ { bookId: 6 }, { bookId: 5 } ]  =>  [ 6, 5 ]
+    const bookIdArray = readLaterBookInteractions.map(
         (interaction) => interaction.bookId,
     );
 
@@ -192,10 +235,10 @@ export async function myList(parent, args, context: Context) {
     });
 
     return {
-        id: `myList-${userId}:` + JSON.stringify(args),
+        id: `readLater-${userId}:` + JSON.stringify(args),
         books,
         count,
-        category: "myList",
+        category: "readLater",
     };
 }
 
@@ -235,7 +278,7 @@ export async function genres(parent, args, context: Context) {
     };
 }
 
-export async function books(parent, args, context: Context) {
+export async function books(parent, args, context: Context): Promise<Booklist> {
     const { paginate, orderBy, filter } = args;
 
     // filter?.authors  -> shorthand for filters? filters.author : undefined.
@@ -243,7 +286,8 @@ export async function books(parent, args, context: Context) {
         ? {
               some: {
                   id: {
-                      in: filter.authors.map((author) => parseInt(author)), // convert array of strings  into array of integers.
+                      // map array of strings into array of integers.
+                      in: filter.authors.map((author) => parseInt(author)),
                   },
               },
           }
@@ -278,4 +322,38 @@ export async function books(parent, args, context: Context) {
         count,
         books,
     };
+}
+
+export async function feed(
+    parent,
+    args,
+    context: Context,
+): Promise<Booklist[]> {
+    const { bookCountEachCategory, categoryCount } = args;
+
+    let feedBookLists: Booklist[] = await generateFeedBookLists(
+        bookCountEachCategory,
+        categoryCount,
+        context,
+    );
+
+    feedBookLists.unshift(
+        await getBooksThatUserIsCurrentlyReading(
+            bookCountEachCategory,
+            context,
+        ),
+    );
+    // highlight/hero unit section books at the top
+    feedBookLists.unshift(
+        await getHighlightBooks(config.feed.highlightBookCount, context),
+    );
+
+    // filter out lists that have 0 books.
+    feedBookLists = feedBookLists.filter((bookListEntry: Booklist) => {
+        return bookListEntry.books.length !== 0;
+    });
+
+    feedBookLists = removeDuplicatesFromArray(feedBookLists, "id");
+
+    return feedBookLists;
 }

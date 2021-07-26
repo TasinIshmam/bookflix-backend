@@ -40,10 +40,10 @@ type Query {
     favoriteBooks( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
 
     """
-    Get user's book reading history for books in user's Booklist (My List)
+    Get user's book reading history for books in user's read later list
     Authentication: Required  (Used to determine userId)
     """
-    myList( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
+    readLaterList( paginate: PaginationInput, orderBy: BookOrderByInput): BookList
 
     """
     Get a user's reading history/interaction with a certain book.
@@ -56,9 +56,9 @@ type Query {
     Authentication: Required  (Used to determine userId)
     """
     feed(
-        "Number of books to return for each category in the feed"
-        bookCountEachCategory: Int,
-        "Number of categories to return"
+        "Number of books to return for each category in the feed. Range:  1 <= bookCountEachCategory <= 20"
+        bookCountEachCategory: Int!,
+        "Number of categories to return. Range:  1 <= categoryCount <= 20"
         categoryCount: Int!
     )
     : [BookList!]!
@@ -71,7 +71,7 @@ type BookList{
     books: [Book!]!
     "Total number of books available in this category (count ignores any kind of skip/take condition)."
     count: Int!
-    categoryName: String
+    category: String
 }
 
 type GenresOutput {
@@ -103,28 +103,28 @@ type Mutation {
         The list of genre(s) that are to be added/removed in user's favorites.
         Skips genre(s) if it already exists (in case of add operation) or if it dosen't exist (in case of remove operation).
         """
-        genreIds: [Int!]!,
+        genreIds: [ID!]!,
         "Add or Remove specified genre(s)"
         operation: AddOrRemove!)
-    : setFavoriteGenreOutput!
+    : setFavoritesOutput!
 
     """
-    Add/Remove a certain book from user's "favorite" list.
+    Add/Remove certain book(s) from user's "favorite" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteBook(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
+    setFavoriteBooks(bookIds: [ID!]!, operation: AddOrRemove!): setFavoritesOutput!
 
     """
-    Add/Remove a certain author from user's "favorite authors" list.
+    Add/Remove author(s) from user's "favorite authors" list.
     Authentication: Required  (Used to determine userId)
     """
-    setFavoriteAuthor(authorId: ID!, operation: AddOrRemove!): UserAuthorInteraction!
+    setFavoriteAuthors(authorIds: [ID!]!, operation: AddOrRemove!): setFavoritesOutput!
 
     """
-    Add/Remove a certain book from user's Booklist (My List)
+    Add/Remove a certain book from user's read later list
     Authentication: Required  (Used to determine userId)
     """
-    setBookToMyList(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
+    setBookToReadLater(bookId: ID!, operation: AddOrRemove!): UserBookInteraction!
 
     """
     Update a user's reading history for a certain book.
@@ -170,7 +170,9 @@ type UserBookInteraction {
     startDate: DateTime!
     lastUpdate: DateTime!
     isFavorite: Boolean!
-    isOnMyList: Boolean!
+    isOnReadLaterList: Boolean!
+    currentPageLocation: String
+
 }
 
 type UserAuthorInteraction {
@@ -222,9 +224,9 @@ type Genre {
     name: String
 }
 
-type setFavoriteGenreOutput {
+type setFavoritesOutput {
     "Number of records that were changed (created/deleted)"
-    count : Int!
+    count: Int!
 }
 
 enum FileType {
@@ -282,6 +284,7 @@ input PaginationInput {
 input updateReadingHistoryInput {
     currentPage: Int
     isFinishedReading: Boolean
+    currentPageLocation: String
 }
 
 enum Sort {
