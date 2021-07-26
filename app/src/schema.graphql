@@ -165,7 +165,6 @@ type UserBookInteraction {
     id: ID!
     book: Book!
     user: User!
-    currentPage: Int!
     isFinishedReading: Boolean!
     startDate: DateTime!
     lastUpdate: DateTime!
@@ -282,7 +281,6 @@ input PaginationInput {
 
 
 input updateReadingHistoryInput {
-    currentPage: Int
     isFinishedReading: Boolean
     currentPageLocation: String
 }

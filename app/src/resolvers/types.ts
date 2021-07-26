@@ -4,7 +4,6 @@ import { Book } from "@prisma/client";
 // Todo: Figure out some automated way to generate all the types.
 
 export interface updateReadingHistoryInput {
-    currentPage?: number;
     isFinishedReading?: boolean;
     currentPageLocation?: string;
 }
