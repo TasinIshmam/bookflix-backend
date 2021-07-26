@@ -67,7 +67,6 @@ model UserBookInteraction {
   bookId              Int
   user                User     @relation(fields: [userId], references: [id])
   userId              Int
-  currentPage         Int      @default(1)
   currentPageLocation String?
   isFinishedReading   Boolean  @default(false)
   startDate           DateTime @default(now())

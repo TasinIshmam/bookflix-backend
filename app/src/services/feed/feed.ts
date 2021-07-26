@@ -100,9 +100,11 @@ export async function getBooksThatUserIsCurrentlyReading(
         where: {
             userId: userId,
             isFinishedReading: false,
-            currentPage: {
-                gt: 1,
-            },
+            NOT: [
+                {
+                    currentPageLocation: null,
+                },
+            ],
         },
         select: { bookId: true },
     });
