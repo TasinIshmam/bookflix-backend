@@ -6,6 +6,7 @@ import { Book } from "@prisma/client";
 export interface updateReadingHistoryInput {
     currentPage?: number;
     isFinishedReading?: boolean;
+    currentPageLocation?: string;
 }
 
 export interface Booklist {
