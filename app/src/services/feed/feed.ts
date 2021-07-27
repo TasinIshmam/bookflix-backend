@@ -74,7 +74,7 @@ export async function getPopularGenreBasedRecommendations(
                     genreWithBooks.books.slice(0, numberOfBooksToTake),
                 ), // return books in random order
                 count: numberOfBooksToTake,
-                category: `Try ${genreWithBooks.name} books`,
+                category: `Try ${genreWithBooks.name}`,
             };
         })
         .filter((bookListEntry: Booklist) => {
@@ -129,7 +129,7 @@ export async function getBooksThatUserIsCurrentlyReading(
         id: `feed-currentlyReading-${userId}-${bookCount}`,
         books: shuffledBooks,
         count: numberOfBooksToTake,
-        category: `Continue reading:`,
+        category: `Continue Reading`,
     };
 }
 
@@ -166,7 +166,7 @@ export async function getFavoriteBooks(
         id: `feed-favoriteBooks-${userId}-${bookCount}`,
         books: shuffledBooks,
         count: numberOfBooksToTake,
-        category: `Go through your favorites`,
+        category: `Go Through your Favorites`,
     };
 }
 
@@ -202,7 +202,7 @@ export async function getBooksMarkedReadLater(
         id: `feed-readLater-${userId}-${bookCount}`,
         books: shuffledBooks,
         count: numberOfBooksToTake,
-        category: `Check out the books you wanted to read later`,
+        category: `Check Out the Books you Wanted to Read Later`,
     };
 }
 
@@ -247,7 +247,7 @@ export async function getBooksByUsersFavoriteAuthors(
                 id: `feed-favoriteAuthor-${authorName}-${context.userId}-${bookCountEachCategory}`,
                 books: shuffledBooks,
                 count: numberOfBooksToTake,
-                category: `More from your favorite Author ${authorName}`,
+                category: `More from your Favorite Author ${authorName}`,
             };
         },
     );
@@ -293,7 +293,7 @@ export async function getBooksFromUsersFavoriteGenres(
                 id: `feed-genre-${genreName}-${bookCountEachCategory}`,
                 books: shuffledBooks,
                 count: numberOfBooksToTake,
-                category: `Because you like ${genreName}`,
+                category: `Because you Like ${genreName}`,
             };
         },
     );
